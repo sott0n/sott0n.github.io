@@ -6,7 +6,6 @@
     <description>Recent content in Posts on SE Can&#39;t Code</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <copyright>© Copyright notice</copyright>
     <lastBuildDate>Sun, 14 Apr 2019 01:50:17 +0900</lastBuildDate><atom:link href="https://sott0n.github.io//post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>ErgoDoxEZキーボードを導入する</title>
@@ -14,7 +13,25 @@
       <pubDate>Sun, 14 Apr 2019 01:50:17 +0900</pubDate>
       
       <guid>https://sott0n.github.io//post/ergodox/</guid>
-      <description>分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。</description>
+      <description>分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
+tl;dr ErgoDox EZの感想を述べると、
+ ErgoDox EZの設定自体はそんなに難しくない ただしJISキーボードを想定する場合は結構辛い 自分好みにキーバインドが設定できるのでかなり楽しい  慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。
+ErgoDox EZとは ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。
+https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/
+自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。 購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。
+キーバインド条件 ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。
+自分の場合は下記の条件でキーバインドを設定した:
+ WindowsとMacbookの両方で利用できること JISキーボードであること  自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。 自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。 当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。
+また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。 ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、 Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。
+キーバインドの設定方法 ErgoDox EZはTeensy USB Development Board と言うソフトウェアを使い、 コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。
+やり方はシンプルで下記のやり方で設定できる:
+ Teensyをダウンロード ファームウェアをコンパイルして.hexを生成 Teensyに生成した.hexを流し込む  ここではまず、ファームウェアのコンパイル方法から説明する。
+ファームウェアのコンパイル まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)
+brew tap osx-cross/avr brew install avr-libc brew install dfu-programmer そのあとは、https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ezのソースコードをダウンロードし、 keymaps/defaultというディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下のkeymap.cと同様のファイルを作成する（コピーして編集するといい）。 それをmake KEYMAP=[your_name]でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。
+自分でkeymap.cを編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。
+https://configure.ergodox-ez.com/layouts/default/latest/0
+このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、Print layoutから印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。
+JISキーボード設定 さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。 書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。 たとえば、JISの場合の@はUSの場合だと[と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。</description>
     </item>
     
   </channel>
