@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title> ONNXのdocを読む: ONNX versioning &middot; SE Can&#39;t Code </title>
+
+
+<link rel="stylesheet" href="https://sott0n.github.io/css/slim.css">
+<link rel="stylesheet" href="https://sott0n.github.io/css/highlight.min.css">
+<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="/favicon.ico">
+
+
+<link href="" rel="alternate" type="application/rss+xml" title="SE Can&#39;t Code" />
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+  <h1 class="site-title"><a href="https://sott0n.github.io/">SE Can&#39;t Code</a></h1>
+  <p class="site-tagline">I&#39;m Software Engineer, not System Engineer.</p>
+  <div class="nav">
+    <a class="nav-btn" href="#">
+      <span class="ci ci-burger"></span>
+    </a>
+    <ul class="nav-list">
+       
+	  <li class="spacer">&ac;</li>
+
+      <li><a href="https://github.com/sott0n">Github</a></li> 
+      <li><a href="https://twitter.com/sott0n_">Twitter</a></li> 
+    </ul>
+  </div>
+</div>
+    <div class="content">
+      <div class="posts">
+        <div class="post">
+          <h2 class="post-title"><a href="https://sott0n.github.io/post/onnx_reading_versioning/">ONNXのdocを読む: ONNX versioning</a></h2>
+          <span class="post-date">Mar 6, 2019 </span>
+          <div class="post-content">
+            <p>ONNXのドキュメントをちゃんと読もうということで読んだところからメモとしていろいろまとめていこうと思う（今更だけど）。今回はONNX利用者がまず意識しないといけないversioningのドキュメントを読む。<br>
+Ref: <a href="https://github.com/onnx/onnx/blob/v1.4.1/docs/Versioning.md">https://github.com/onnx/onnx/blob/v1.4.1/docs/Versioning.md</a></p>
+<hr>
+<h2 id="onnx-versioningの基本方針">ONNX versioningの基本方針</h2>
+<p>ONNXのversioningには大きく三つのポリシーがある:</p>
+<ul>
+<li>IR version: グラフと演算子の抽象モデル、それらのフォーマットのバージョン管理。</li>
+<li>Operator version: ONNX graphから参照されるオペレータ仕様のバージョン管理。</li>
+<li>Model version: 定義済み/学習済みモデルのバージョン管理。</li>
+</ul>
+<p>IR versionとOperator versionは守らなければいけないバージョン管理であるが、Model versionに関しては任意である（推奨されているだけ）。ローカルで独自に利用する場合はユーザーの判断に任されるが、オープンにシェアする前提のモデルに関してはversioninigをすべきである。</p>
+<h2 id="ir-versioning">IR versioning</h2>
+<p>型定義などIRを構築するもののバージョン管理。ONNX IR formatはprotobuf3のUpdating a Message Typeに規定されたバージョン管理ガイドラインを準拠している。ONNXにはONNX checkerというものがあり、このツールによってルールが守られているかどうかがチェックされている。<br>
+Ref: <a href="https://developers.google.com/protocol-buffers/docs/proto3#updating">Protobuf3 Updating a Message Type</a></p>
+<h2 id="operator-versioning">Operator versioning</h2>
+<p>Deep Learningの各命令（convやfcなど）のバージョン管理。operatorは3要素のtupleで定義されている。</p>
+<blockquote>
+<p>(domain.op_type:op_version)
+グラフ内のノードはいつもこの3要素を参照してoperatorを見るようになっている。また、破壊的なoperatorの変更は下記の通り:</p>
+</blockquote>
+<ul>
+<li>operator自体のadding/removing/renaming。また、新しいオプション属性の追加も含まれる</li>
+<li>operatorのinputとoutputのadding/removing/reordering。</li>
+<li>型の追加と削除、あるいは変更</li>
+<li>既存parameterのシグネチャの新しい振る舞い</li>
+</ul>
+<p>ONNXモデルは二つのオペレータ情報（domain, opset_verison）を含んだリストを宣言する必要がある。空の文字列（&quot;&quot;）ドメインはONNX仕様の一部として定義されているオペレータであることを示す。与えられたモデルよって指定されたオペレータセットの和集合は、モデルグラフ内の各ノードに対して互換性のあるオペレータを宣言しなければならない。</p>
+<h2 id="model-versioning">Model versioning</h2>
+<p>Model versioningはONNX変換して配布するユーザーによって依存するため、あくまでもONNXが推奨するプラクティスを提示しているだけである。なので、学習済みモデルをONNXのフォーマットに変換して配布する場合はONNXが推奨するバージョンの付け方に従うといい。推奨されるやり方としては破壊的変更であるケースと非破壊的変更のケースの二つに分かれる。
+破壊的変更である場合はModelProto.model_versionのメジャーバージョンをインクリメントする。破壊的変更は下記のようなものを含む:</p>
+<ul>
+<li>カラー画像のインプットからグレースケールに変換するといったインプットまたはアウトプットの意味を変えてしまう変更</li>
+<li>互換性のない型の変更</li>
+<li>GraphProto内の値と同じ名前の値いったインプットの追加</li>
+<li>既存アウトプットの削除</li>
+</ul>
+<p>また、非破壊的変更はModelProto.model_versionのマイナーバージョンをインクリメントする。非破壊的変更は下記のようなものを含む:
+互換性のある型の変更
+意味を持った、または指定されたデフォルト値がある新しい入力の追加
+以前のバージョンのグラフでは不可能だった入力によって引き起こされる新しい振る舞いの追加</p>
+<hr>
+<p>ONNXの躓くところとして、opsetのバージョンの差異があると思う。バージョンが違った際にはONNXが提供しているVersion Converterを利用することができるが、まだ上手く動かないといったことは多い。ONNXを利用する場合は、インプットとアウトプットのONNX対応のバージョンの互換性を確認する必要がある。</p>
+
+          </div>
+        </div>
+        <div class="pagination"> 
+          <a class="btn next " href="https://sott0n.github.io/post/ergodox/"> Next</a> 
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+  
+  <p>Powered by <a href="https://gohugo.io">Hugo</a>. This theme—Slim—is open sourced on <a href="https://github.com/zhe/hugo-theme-slim">Github</a>.</p>
+  
+</div>
+
+  </div>
+  <script src="https://sott0n.github.io/js/slim.js"></script>
+  <script src="https://sott0n.github.io/js/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad();
+  </script>
+  
+</body>
+
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title> x86_64: レジスタについて &middot; SE Can&#39;t Code </title>
+
+
+<link rel="stylesheet" href="https://sott0n.github.io/css/slim.css">
+<link rel="stylesheet" href="https://sott0n.github.io/css/highlight.min.css">
+<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="/favicon.ico">
+
+
+<link href="" rel="alternate" type="application/rss+xml" title="SE Can&#39;t Code" />
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+  <h1 class="site-title"><a href="https://sott0n.github.io/">SE Can&#39;t Code</a></h1>
+  <p class="site-tagline">I&#39;m Software Engineer, not System Engineer.</p>
+  <div class="nav">
+    <a class="nav-btn" href="#">
+      <span class="ci ci-burger"></span>
+    </a>
+    <ul class="nav-list">
+       
+	  <li class="spacer">&ac;</li>
+
+      <li><a href="https://github.com/sott0n">Github</a></li> 
+      <li><a href="https://twitter.com/sott0n_">Twitter</a></li> 
+    </ul>
+  </div>
+</div>
+    <div class="content">
+      <div class="posts">
+        <div class="post">
+          <h2 class="post-title"><a href="https://sott0n.github.io/post/x86_64_basic/">x86_64: レジスタについて</a></h2>
+          <span class="post-date">May 1, 2019 </span>
+          <div class="post-content">
+            <p>CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。</p>
+<h2 id="レジスタの種類">レジスタの種類</h2>
+<p>一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。</p>
+<ul>
+<li>汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。</li>
+<li>プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。</li>
+<li>フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。</li>
+<li>浮動小数レジスタ: 浮動小数演算のデータを保持する。</li>
+</ul>
+<p>x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。</p>
+<table>
+<thead>
+<tr>
+<th>レジスタ名</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rax</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rbx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rcx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rdx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rsi</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rdi</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rbp</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rsp</td>
+<td>汎用レジスタ兼スタックポインタ</td>
+</tr>
+<tr>
+<td>r8</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r9</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r10</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r11</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r12</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r13</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r14</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r15</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rip</td>
+<td>プログラムカウンタ</td>
+</tr>
+<tr>
+<td>eflags</td>
+<td>フラグレジスタ</td>
+</tr>
+<tr>
+<td>cs</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>ss</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>ds</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>es</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>fs</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>gs</td>
+<td>セグメントレジスタ</td>
+</tr>
+</tbody>
+</table>
+<p>このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。</p>
+<p>レジスタは容量がこのように小さい分、CPU内部に存在するためにコンピュータの中でも最も高速にアクセスできる場所にある。次にキャッシュメモリやメインメモリがあるが、レジスタと比べるとアクセス速度は遅くなる。ので、レジスタはコンピュータにとって命令実行の際に最も高速に動かせる場所であり、メモリへのアドレスを保存していたりとプログラム実行のための中核となる機能と言える。</p>
+<h2 id="アセンブリ言語">アセンブリ言語</h2>
+<p>簡単なプログラムを作成し、x86_64でどのようにプログラムが動くのかをデバッグして挙動を確認する。</p>
+<pre><code>	.globl	main
+main:
+	mov $1, %rax
+	mov $2, %r8
+	add %r8, %rax
+	ret
+</code></pre><p>このプログラムはとても単純だ。命令の1行目だと1という即値をraxレジスタに保存しているだけだ(即値を表現する時は$を数値の前に付ける)。これはアセンブリ言語で、このプログラムをgccでコンパイルしてgdbでデバッグしながらどのようにプログラムが実行していくのかを見ていくのだが、まずはこのプログラムの記法について触れる。</p>
+<p>アセンブリ言語ではCPUによって記法が変わる。基本的にはAT&amp;T記法とIntel記法で分かれるのだが、一般的なCPUで採用されているIntel記法とは違って、x86_64のLinuxではAT&amp;T記法を採用している。</p>
+<pre><code># Intel記法
+instruction operand0, operand1
+
+# AT&amp;T記法
+instruction operand1, operand0
+</code></pre><p>これは結構混乱してしまうところなのだが、二つの記法でoperandの順序が逆転している。instructionはmovやaddといった命令を指すもので、これはニーモニックと一般的に呼ばれている。その次に続くのはオペランドで、たとえばAレジスタの値をBレジスタに書き換える、といった命令があった場合のAレジスタやBレジスタがオペランドとして表現される。</p>
+<p>さて、上記のプログラムに立ち戻ると、このプログラムは「即値1を保存したraxレジスタに対して、即値2をr8レジスタに保存したものを加算する」という命令になるので、1+2=3という単純な命令を表現している。mainというのはラベルと呼ばれ、main関数内の実行内容という捉え方で問題ない。retはreturnで、スタックで呼び出されていく命令に対して呼び出し元のアドレスに戻ることを意味する。</p>
+<h2 id="gdbでデバッグしてみる">gdbでデバッグしてみる</h2>
+<p>プログラムの動きを見ていくためにgdbでデバッグしていこう。上に書いたプログラムをgccでコンパイルしたあとでgdbを実行してプログラムの動きを見ていく。</p>
+<pre><code>$ gcc sample.s
+$ gdb a.out
+</code></pre><p>アセンブリをコンパイルするとa.outのファイルが生成されるので、gdbでa.outファイルを指定して実行する。すると対話的にgdbが起動してコマンドを一つ一つ打っていくことでプログラムの動きを一つ一つ追っていくことができる。いわゆるデバッグするということだ。</p>
+<p>gdbの基本コマンドをここにまとめる。</p>
+<ul>
+<li>start: プログラムを開始してmain関数の先頭で処理を止める</li>
+<li>info registers: 各レジスタの値を表示</li>
+<li>disassemble: 現在実行中の関数に含まれる命令を表示</li>
+<li>stepi: 一命令実行する</li>
+<li>print: コマンドに与えた式の値を表示する</li>
+<li>quit: gdb を終了</li>
+</ul>
+<p>gdbは対話的なデバッガーなのでコマンドを打ちながら命令を実行していき、情報を見ていく。info registersを叩くと各レジスタに保存されているデータやアドレスが表示されるため、命令を実行していく中でこの値が変わることを確認する。まずはstartでa.outのデバッグを開始する。</p>
+<pre><code>(gdb) start
+Temporary breakpoint 1 at 0x5fa
+Starting program: /home/a.out
+
+Temporary breakpoint 1, 0x00005555555545fa in main ()
+(gdb) info registers
+rax            0x5555555545fa   93824992232954
+rbx            0x0      0
+rcx            0x555555554610   93824992232976
+rdx            0x7fffffffe798   140737488349080
+rsi            0x7fffffffe788   140737488349064
+rdi            0x1      1
+rbp            0x555555554610   0x555555554610 &lt;__libc_csu_init&gt;
+rsp            0x7fffffffe6a8   0x7fffffffe6a8
+r8             0x7ffff7dd0d80   140737351847296
+r9             0x7ffff7dd0d80   140737351847296
+r10            0x0      0
+r11            0x0      0
+r12            0x5555555544f0   93824992232688
+r13            0x7fffffffe780   140737488349056
+r14            0x0      0
+r15            0x0      0
+rip            0x5555555545fa   0x5555555545fa &lt;main&gt;
+eflags         0x246    [ PF ZF IF ]
+cs             0x33     51
+ss             0x2b     43
+ds             0x0      0
+es             0x0      0
+fs             0x0      0
+gs             0x0      0
+</code></pre><p>このようにinfo registersで各レジスタの値を確認することができる。次に読み込んだプログラムをstepiで一つ一つ命令を進めていく。</p>
+<pre><code>(gdb) stepi
+0x0000555555554601 in main ()
+(gdb) stepi
+0x0000555555554608 in main ()
+(gdb) print $rax
+$1 = 1
+(gdb) print $r8
+$2 = 2
+</code></pre><p>printでレジスタの値を確認すると、raxには即値1が、r8には即値2が保存されており、mov命令が実行されたことがわかる。ここでdisassembleコマンドを打ってみる。</p>
+<pre><code>(gdb) disassemble
+Dump of assembler code for function main:
+   0x00005555555545fa &lt;+0&gt;:     mov    $0x1,%rax
+   0x0000555555554601 &lt;+7&gt;:     mov    $0x2,%r8
+=&gt; 0x0000555555554608 &lt;+14&gt;:    add    %r8,%rax
+   0x000055555555460b &lt;+17&gt;:    retq
+   0x000055555555460c &lt;+18&gt;:    nopl   0x0(%rax)
+End of assembler dump.
+</code></pre><p>disassembleコマンドは現在デバッガによって停止されている命令の位置を矢印で示している。つまり、二つのmovが実行されたところで止まっている。ここで命令を進めてadd命令を行う。</p>
+<pre><code>(gdb) stepi
+0x000055555555460b in main ()
+(gdb) print $rax
+$3 = 3
+(gdb) print $r8
+$4 = 2
+</code></pre><p>printで確認してみると、raxの値が1+2=3となり、正しく即値が加算されていることがわかる。</p>
+<p>このようにニーモニックの命令を一つ一つ実行していき、レジスタの値を操作することで機械語というものは構成される。世の中には多くのプログラミング言語が存在するが、コンパイラによってコンパイルされるとCPUが理解できるこのような機械語に変換され(これはアセンブリだけど)、レジスタにある値やアドレスを操作しながら演算していくのが基本的なコンピュータの動きとなる。</p>
+
+          </div>
+        </div>
+        <div class="pagination">
+          <a class="btn previous " href="https://sott0n.github.io/post/mlir/"> Prev</a>  
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+  
+  <p>Powered by <a href="https://gohugo.io">Hugo</a>. This theme—Slim—is open sourced on <a href="https://github.com/zhe/hugo-theme-slim">Github</a>.</p>
+  
+</div>
+
+  </div>
+  <script src="https://sott0n.github.io/js/slim.js"></script>
+  <script src="https://sott0n.github.io/js/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad();
+  </script>
+  
+</body>
+
+</html>

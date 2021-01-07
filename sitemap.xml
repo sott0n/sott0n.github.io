@@ -3,26 +3,57 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://sott0n.github.io/post/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sott0n.github.io/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sott0n.github.io/tags/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sott0n.github.io/tags/x86_64/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sott0n.github.io/post/x86_64_basic/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sott0n.github.io/tags/llvm/</loc>
+    <lastmod>2019-04-19T07:50:26+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sott0n.github.io/tags/ml/</loc>
+    <lastmod>2019-04-19T07:50:26+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://sott0n.github.io/post/mlir/</loc>
+    <lastmod>2019-04-19T07:50:26+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://sott0n.github.io/post/ergodox/</loc>
     <lastmod>2019-04-14T01:50:17+09:00</lastmod>
   </url>
   
   <url>
-    <loc>https://sott0n.github.io/post/</loc>
-    <lastmod>2019-04-14T01:50:17+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://sott0n.github.io/</loc>
-    <lastmod>2019-04-14T01:50:17+09:00</lastmod>
+    <loc>https://sott0n.github.io/post/onnx_reading_versioning/</loc>
+    <lastmod>2019-03-06T09:44:12+09:00</lastmod>
   </url>
   
   <url>
     <loc>https://sott0n.github.io/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>https://sott0n.github.io/tags/</loc>
   </url>
   
 </urlset>

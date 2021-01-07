@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>LLVM on SE Can&#39;t Code</title>
+    <link>https://sott0n.github.io/tags/llvm/</link>
+    <description>Recent content in LLVM on SE Can&#39;t Code</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <lastBuildDate>Fri, 19 Apr 2019 07:50:26 +0900</lastBuildDate><atom:link href="https://sott0n.github.io/tags/llvm/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MLIR: 新しいTFコンパイラインフラとなる中間表現について</title>
+      <link>https://sott0n.github.io/post/mlir/</link>
+      <pubDate>Fri, 19 Apr 2019 07:50:26 +0900</pubDate>
+      
+      <guid>https://sott0n.github.io/post/mlir/</guid>
+      <description>2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
+tl;dr MLIR(Multi-Level Intermediate Representation)を一言で表すと:
+ TensorFlowの新しいSSAベースの中間表現 複雑化しているTensorFlowのコンパイラ郡を統一する目的がある LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている  位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。 これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。
+複雑化したTFコンパイラ TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、 これらは開発が進むと共に複雑化していった。
+たとえば、TensorFlow XLAの場合だと HLOと言う中間表現に変換してグラフ最適化などを実行した上で、LLVM IRに変換してCPUやGPU向けにコードジェネレーションを行ったり、 TPU IRに変換してTPU用に最適化をかけたりする。Tensor RTはNVIDIAが出しているコンパイラだが、NVIDIAのGPUアーキテクチャをターゲットにする場合はこれを利用するとNVIDIA特化の最適化が行われる。 モバイル上でDeep Learningを動かしたい場合はTensorFlow Liteを利用するだろう。
+このような複雑怪奇な状態は開発者をとても困惑させる。と言うのも、それぞれのコンパイラではそれぞれの中間表現を設計しており、それらはとても似ているが決して同じものではないので、 複数のアーキテクチャをターゲットにした場合は一つ一つ最適化を掛け直し、path変換を行わなければならない。また、それぞれでエラーメッセージの設計も違うので、開発者をとても困惑させるだろう。
+MLIRとは MLIRはこれらの問題を解決する新しい中間表現として設計されている。最新の最適化コンパイラのための柔軟なインフラで、また、LLVMのデザインに強く影響を受けている。 たとえば以下のようなところはLLVMと似たデザインとなっている:
+ SSAベースな中間表現 柔軟な型システム tree address 構造が同じ(Module/Function/Block/Instruction) 同じ単位の中で複数レベルの抽象化を組み合わせたグラフの表現/分析/変換が可能  また、これらの抽象概念には、TensorFlow操作、入れ子になった多面体ループ領域、さらにはLLVM命令、さらには固定ハードウェア操作とタイプが含まれる。
+先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、 これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。 MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。
+MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
+ TensorFlow IR, which represents all things possible in TensorFlow graphs XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs) An experimental affine dialect, which focuses on polyhedral representations and optimizations LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM TensorFlow Lite, which will translate to running code on mobile platforms  Dialectsはカスタム型を定義することができる。 これにより将来的にどのDialectsであれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。</description>
+    </item>
+    
+  </channel>
+</rss>
