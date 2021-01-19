@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head><title>
+    MLIR: 新しいTFコンパイラインフラとなる中間表現について | 
+    
+    SE Can&#39;t Code</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
+tl;dr MLIR(Multi-Level Intermediate Representation)を一言で表すと:
+ TensorFlowの新しいSSAベースの中間表現 複雑化しているTensorFlowのコンパイラ郡を統一する目的がある LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている  位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。 これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。
+複雑化したTFコンパイラ TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、 これらは開発が進むと共に複雑化していった。
+たとえば、TensorFlow XLAの場合だと HLOと言う中間表現に変換してグラフ最適化などを実行した上で、LLVM IRに変換してCPUやGPU向けにコードジェネレーションを行ったり、 TPU IRに変換してTPU用に最適化をかけたりする。Tensor RTはNVIDIAが出しているコンパイラだが、NVIDIAのGPUアーキテクチャをターゲットにする場合はこれを利用するとNVIDIA特化の最適化が行われる。 モバイル上でDeep Learningを動かしたい場合はTensorFlow Liteを利用するだろう。
+このような複雑怪奇な状態は開発者をとても困惑させる。と言うのも、それぞれのコンパイラではそれぞれの中間表現を設計しており、それらはとても似ているが決して同じものではないので、 複数のアーキテクチャをターゲットにした場合は一つ一つ最適化を掛け直し、path変換を行わなければならない。また、それぞれでエラーメッセージの設計も違うので、開発者をとても困惑させるだろう。
+MLIRとは MLIRはこれらの問題を解決する新しい中間表現として設計されている。最新の最適化コンパイラのための柔軟なインフラで、また、LLVMのデザインに強く影響を受けている。 たとえば以下のようなところはLLVMと似たデザインとなっている:
+ SSAベースな中間表現 柔軟な型システム tree address 構造が同じ(Module/Function/Block/Instruction) 同じ単位の中で複数レベルの抽象化を組み合わせたグラフの表現/分析/変換が可能  また、これらの抽象概念には、TensorFlow操作、入れ子になった多面体ループ領域、さらにはLLVM命令、さらには固定ハードウェア操作とタイプが含まれる。
+先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、 これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。 MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。
+MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
+ TensorFlow IR, which represents all things possible in TensorFlow graphs XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs) An experimental affine dialect, which focuses on polyhedral representations and optimizations LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM TensorFlow Lite, which will translate to running code on mobile platforms  Dialectsはカスタム型を定義することができる。 これにより将来的にどのDialectsであれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。
+    ">
+
+
+<meta property="og:title" content="MLIR: 新しいTFコンパイラインフラとなる中間表現について" />
+<meta property="og:description" content="2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
+tl;dr MLIR(Multi-Level Intermediate Representation)を一言で表すと:
+ TensorFlowの新しいSSAベースの中間表現 複雑化しているTensorFlowのコンパイラ郡を統一する目的がある LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている  位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。 これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。
+複雑化したTFコンパイラ TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、 これらは開発が進むと共に複雑化していった。
+たとえば、TensorFlow XLAの場合だと HLOと言う中間表現に変換してグラフ最適化などを実行した上で、LLVM IRに変換してCPUやGPU向けにコードジェネレーションを行ったり、 TPU IRに変換してTPU用に最適化をかけたりする。Tensor RTはNVIDIAが出しているコンパイラだが、NVIDIAのGPUアーキテクチャをターゲットにする場合はこれを利用するとNVIDIA特化の最適化が行われる。 モバイル上でDeep Learningを動かしたい場合はTensorFlow Liteを利用するだろう。
+このような複雑怪奇な状態は開発者をとても困惑させる。と言うのも、それぞれのコンパイラではそれぞれの中間表現を設計しており、それらはとても似ているが決して同じものではないので、 複数のアーキテクチャをターゲットにした場合は一つ一つ最適化を掛け直し、path変換を行わなければならない。また、それぞれでエラーメッセージの設計も違うので、開発者をとても困惑させるだろう。
+MLIRとは MLIRはこれらの問題を解決する新しい中間表現として設計されている。最新の最適化コンパイラのための柔軟なインフラで、また、LLVMのデザインに強く影響を受けている。 たとえば以下のようなところはLLVMと似たデザインとなっている:
+ SSAベースな中間表現 柔軟な型システム tree address 構造が同じ(Module/Function/Block/Instruction) 同じ単位の中で複数レベルの抽象化を組み合わせたグラフの表現/分析/変換が可能  また、これらの抽象概念には、TensorFlow操作、入れ子になった多面体ループ領域、さらにはLLVM命令、さらには固定ハードウェア操作とタイプが含まれる。
+先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、 これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。 MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。
+MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
+ TensorFlow IR, which represents all things possible in TensorFlow graphs XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs) An experimental affine dialect, which focuses on polyhedral representations and optimizations LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM TensorFlow Lite, which will translate to running code on mobile platforms  Dialectsはカスタム型を定義することができる。 これにより将来的にどのDialectsであれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://sott0n.github.io/post/mlir/" />
+<meta property="article:published_time" content="2019-04-19T07:50:26+09:00" />
+<meta property="article:modified_time" content="2019-04-19T07:50:26+09:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="MLIR: 新しいTFコンパイラインフラとなる中間表現について"/>
+<meta name="twitter:description" content="2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
+tl;dr MLIR(Multi-Level Intermediate Representation)を一言で表すと:
+ TensorFlowの新しいSSAベースの中間表現 複雑化しているTensorFlowのコンパイラ郡を統一する目的がある LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている  位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。 これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。
+複雑化したTFコンパイラ TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、 これらは開発が進むと共に複雑化していった。
+たとえば、TensorFlow XLAの場合だと HLOと言う中間表現に変換してグラフ最適化などを実行した上で、LLVM IRに変換してCPUやGPU向けにコードジェネレーションを行ったり、 TPU IRに変換してTPU用に最適化をかけたりする。Tensor RTはNVIDIAが出しているコンパイラだが、NVIDIAのGPUアーキテクチャをターゲットにする場合はこれを利用するとNVIDIA特化の最適化が行われる。 モバイル上でDeep Learningを動かしたい場合はTensorFlow Liteを利用するだろう。
+このような複雑怪奇な状態は開発者をとても困惑させる。と言うのも、それぞれのコンパイラではそれぞれの中間表現を設計しており、それらはとても似ているが決して同じものではないので、 複数のアーキテクチャをターゲットにした場合は一つ一つ最適化を掛け直し、path変換を行わなければならない。また、それぞれでエラーメッセージの設計も違うので、開発者をとても困惑させるだろう。
+MLIRとは MLIRはこれらの問題を解決する新しい中間表現として設計されている。最新の最適化コンパイラのための柔軟なインフラで、また、LLVMのデザインに強く影響を受けている。 たとえば以下のようなところはLLVMと似たデザインとなっている:
+ SSAベースな中間表現 柔軟な型システム tree address 構造が同じ(Module/Function/Block/Instruction) 同じ単位の中で複数レベルの抽象化を組み合わせたグラフの表現/分析/変換が可能  また、これらの抽象概念には、TensorFlow操作、入れ子になった多面体ループ領域、さらにはLLVM命令、さらには固定ハードウェア操作とタイプが含まれる。
+先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、 これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。 MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。
+MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
+ TensorFlow IR, which represents all things possible in TensorFlow graphs XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs) An experimental affine dialect, which focuses on polyhedral representations and optimizations LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM TensorFlow Lite, which will translate to running code on mobile platforms  Dialectsはカスタム型を定義することができる。 これにより将来的にどのDialectsであれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。"/>
+
+<meta itemprop="name" content="MLIR: 新しいTFコンパイラインフラとなる中間表現について">
+<meta itemprop="description" content="2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
+tl;dr MLIR(Multi-Level Intermediate Representation)を一言で表すと:
+ TensorFlowの新しいSSAベースの中間表現 複雑化しているTensorFlowのコンパイラ郡を統一する目的がある LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている  位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。 これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。
+複雑化したTFコンパイラ TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、 これらは開発が進むと共に複雑化していった。
+たとえば、TensorFlow XLAの場合だと HLOと言う中間表現に変換してグラフ最適化などを実行した上で、LLVM IRに変換してCPUやGPU向けにコードジェネレーションを行ったり、 TPU IRに変換してTPU用に最適化をかけたりする。Tensor RTはNVIDIAが出しているコンパイラだが、NVIDIAのGPUアーキテクチャをターゲットにする場合はこれを利用するとNVIDIA特化の最適化が行われる。 モバイル上でDeep Learningを動かしたい場合はTensorFlow Liteを利用するだろう。
+このような複雑怪奇な状態は開発者をとても困惑させる。と言うのも、それぞれのコンパイラではそれぞれの中間表現を設計しており、それらはとても似ているが決して同じものではないので、 複数のアーキテクチャをターゲットにした場合は一つ一つ最適化を掛け直し、path変換を行わなければならない。また、それぞれでエラーメッセージの設計も違うので、開発者をとても困惑させるだろう。
+MLIRとは MLIRはこれらの問題を解決する新しい中間表現として設計されている。最新の最適化コンパイラのための柔軟なインフラで、また、LLVMのデザインに強く影響を受けている。 たとえば以下のようなところはLLVMと似たデザインとなっている:
+ SSAベースな中間表現 柔軟な型システム tree address 構造が同じ(Module/Function/Block/Instruction) 同じ単位の中で複数レベルの抽象化を組み合わせたグラフの表現/分析/変換が可能  また、これらの抽象概念には、TensorFlow操作、入れ子になった多面体ループ領域、さらにはLLVM命令、さらには固定ハードウェア操作とタイプが含まれる。
+先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、 これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。 MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。
+MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
+ TensorFlow IR, which represents all things possible in TensorFlow graphs XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs) An experimental affine dialect, which focuses on polyhedral representations and optimizations LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM TensorFlow Lite, which will translate to running code on mobile platforms  Dialectsはカスタム型を定義することができる。 これにより将来的にどのDialectsであれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。">
+<meta itemprop="datePublished" content="2019-04-19T07:50:26+09:00" />
+<meta itemprop="dateModified" content="2019-04-19T07:50:26+09:00" />
+<meta itemprop="wordCount" content="157">
+
+
+
+<meta itemprop="keywords" content="LLVM,ml," />
+
+<link rel="canonical" href="https://sott0n.github.io/post/mlir/" />
+
+<link rel="icon" type="image/png" href="https://sott0n.github.io/image/favicon.ico">
+
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/bulma.min.css">
+
+
+
+
+
+<script src=/js/ramium.js></script>
+<link rel="stylesheet" href=/css/ramium.css>
+
+
+
+
+
+</head>
+
+<body><nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href=/>
+      
+      <strong>SE Can&#39;t Code </strong>
+      
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      
+      
+      <a class="navbar-item" href="/">Home</a>
+      
+      
+      
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">This Blog</a>
+        <div class="navbar-dropdown">
+          
+          <a class="navbar-item" href="/tags/">All Tags</a>
+          
+          <a class="navbar-item" href="/sections/">All Sections</a>
+          
+          <a class="navbar-item" href="/posts/">All Posts</a>
+          
+        </div>
+      </div>
+      
+      
+      
+      <a class="navbar-item" href="/authorr/">Author</a>
+      
+      
+    </div>
+
+    <div class="navbar-end">
+      
+
+      
+      <div class="navbar-item">
+        <form id="cse-search-box-form-id" onsubmit="return executeQuery();" role="search">
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <input id="cse-search-input-box-id" size=15 class="input" type="text" autocomplete="off"
+                placeholder="&#xf1a0; Google search" style="font-family:Arial, FontAwesome">
+            </div>
+
+            <div class="control">
+              <button type="submit" class="button is-black">
+                <i class="fa fa-search"></i>
+                </a>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</nav><div class="columns is-centered">
+        <div id="page-body" class="column is-7">
+
+<div class="content blog">
+    <h1>MLIR: 新しいTFコンパイラインフラとなる中間表現について</h1>
+
+    <div id="infobar" class="level is-mobile">
+        <div class="level-left">
+            
+            <div class="level-item">
+                <p class="subtitle info date">Apr 19, 2019
+                </p>
+            </div>
+            
+
+            <div class="level-item">
+                <p class="subtitle info">
+                    11 mins read
+                </p>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            <div class="tags">
+                
+                <a class="tag is-dark is-rounded" href="/tags/llvm">LLVM</a>
+                
+                <a class="tag is-dark is-rounded" href="/tags/ml">Ml</a>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="tags is-hidden-desktop">
+        
+        <a class="tag is-dark is-rounded" href="/tags/llvm">L l v m</a>
+        
+        <a class="tag is-dark is-rounded" href="/tags/ml">Ml</a>
+        
+    </div>
+
+    <div class="blog-text">
+        
+
+        <p><code>2019 European LLVM Developers Meeting</code>を眺めていたらGoogleが<code>Multi-Level Intermediate Representation for Compiler Infrastructure</code>と言う
+新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。
+いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。</p>
+<h2 id="tldr">tl;dr</h2>
+<p>MLIR(Multi-Level Intermediate Representation)を一言で表すと:</p>
+<ul>
+<li>TensorFlowの新しいSSAベースの中間表現</li>
+<li>複雑化しているTensorFlowのコンパイラ郡を統一する目的がある</li>
+<li>LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている</li>
+</ul>
+<p>位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。
+これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。</p>
+<h2 id="複雑化したtfコンパイラ">複雑化したTFコンパイラ</h2>
+<p>TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、
+これらは開発が進むと共に複雑化していった。</p>
+<p><img src="/image/mlir_image.png" alt="image" title="ref: https://medium.com/tensorflow/mlir-a-new-intermediate-representation-and-compiler-framework-beba999ed18d"></p>
+<p>たとえば、TensorFlow XLAの場合だと HLOと言う中間表現に変換してグラフ最適化などを実行した上で、LLVM IRに変換してCPUやGPU向けにコードジェネレーションを行ったり、
+TPU IRに変換してTPU用に最適化をかけたりする。Tensor RTはNVIDIAが出しているコンパイラだが、NVIDIAのGPUアーキテクチャをターゲットにする場合はこれを利用するとNVIDIA特化の最適化が行われる。
+モバイル上でDeep Learningを動かしたい場合はTensorFlow Liteを利用するだろう。</p>
+<p>このような複雑怪奇な状態は開発者をとても困惑させる。と言うのも、それぞれのコンパイラではそれぞれの中間表現を設計しており、それらはとても似ているが決して同じものではないので、
+複数のアーキテクチャをターゲットにした場合は一つ一つ最適化を掛け直し、path変換を行わなければならない。また、それぞれでエラーメッセージの設計も違うので、開発者をとても困惑させるだろう。</p>
+<h2 id="mlirとは">MLIRとは</h2>
+<p>MLIRはこれらの問題を解決する新しい中間表現として設計されている。最新の最適化コンパイラのための柔軟なインフラで、また、LLVMのデザインに強く影響を受けている。
+たとえば以下のようなところはLLVMと似たデザインとなっている:</p>
+<ul>
+<li>SSAベースな中間表現</li>
+<li>柔軟な型システム</li>
+<li>tree address</li>
+<li>構造が同じ(Module/Function/Block/Instruction)</li>
+<li>同じ単位の中で複数レベルの抽象化を組み合わせたグラフの表現/分析/変換が可能</li>
+</ul>
+<p>また、これらの抽象概念には、TensorFlow操作、入れ子になった多面体ループ領域、さらにはLLVM命令、さらには固定ハードウェア操作とタイプが含まれる。</p>
+<p>先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、
+これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。
+MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。</p>
+<h2 id="mlir-dialects">MLIR Dialects</h2>
+<p>MLIRは下記をターゲットとしてサポートしている:</p>
+<ul>
+<li>TensorFlow IR, which represents all things possible in TensorFlow graphs</li>
+<li>XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs)</li>
+<li>An experimental affine dialect, which focuses on polyhedral representations and optimizations</li>
+<li>LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM</li>
+<li>TensorFlow Lite, which will translate to running code on mobile platforms</li>
+</ul>
+<p><code>Dialects</code>はカスタム型を定義することができる。
+これにより将来的にどの<code>Dialects</code>であれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。</p>
+<p>新しい低レベルコンパイラを接続したい場合は、新しい<code>Dialects</code>とTensorFlow Graph dialectsと自身の<code>Dialects</code>の間の下位部分を作成する。
+これにより同じモデルの異なるレベルで<code>Dialects</code>をターゲットにすることさえできる。
+また、MLIRはあらゆるレベルでの変換を構成することを可能にし、IRで自分自身の操作と抽象化を定義することができる。</p>
+<hr>
+<h3 id="reference">Reference</h3>
+<ul>
+<li><a href="https://github.com/tensorflow/mlir">MLIR</a></li>
+<li><a href="https://drive.google.com/file/d/1hUeAJXcAXwz82RXA5VtO5ZoH8cVQhrOK/view">MLIR Primer:A Compiler Infrastructure for the End of Moore’s Law</a></li>
+<li><a href="https://medium.com/tensorflow/mlir-a-new-intermediate-representation-and-compiler-framework-beba999ed18d">MLIR: A new intermediate representation and compiler framework</a></li>
+</ul>
+
+    </div>
+</div><div id="social-media-share" class="has-text-centered">
+	<p><i>Sharing is caring!</i></p>
+	<br>
+	
+	<div class="share-buttons">
+	    <a  href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fsott0n.github.io%2fpost%2fmlir%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Facebook. Opens in a new window.">
+	        <img src=/img/icons/45px/facebook.png>
+	    </a>
+
+	    <a  href="https://twitter.com/intent/tweet?text=MLIR%3a%20%e6%96%b0%e3%81%97%e3%81%84TF%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%82%a4%e3%83%b3%e3%83%95%e3%83%a9%e3%81%a8%e3%81%aa%e3%82%8b%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%ab%e3%81%a4%e3%81%84%e3%81%a6&url=https%3a%2f%2fsott0n.github.io%2fpost%2fmlir%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Twitter. Opens in a new window." >
+	        <img src=/img/icons/45px/twitter.png>
+	    </a>
+
+		<a  href="http://www.reddit.com/submit?url=https%3a%2f%2fsott0n.github.io%2fpost%2fmlir%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Reddit. Opens in a new window." >
+	        <img src=/img/icons/45px/reddit.png>
+	    </a>
+
+	    <a  href="http://pinterest.com/pin/create/button/?url=https%3a%2f%2fsott0n.github.io%2fpost%2fmlir%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Pinterest. Opens in a new window." >
+	        <img src=/img/icons/45px/pinterest.png>
+	    </a>
+
+	    <a  href="http://www.tumblr.com/share/link?url=https%3a%2f%2fsott0n.github.io%2fpost%2fmlir%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Tumblr. Opens in a new window." >
+	        <img src=/img/icons/45px/tumblr.png>
+	    </a>
+
+		<a  href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fsott0n.github.io%2fpost%2fmlir%2f
+			&title=MLIR%3a%20%e6%96%b0%e3%81%97%e3%81%84TF%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%82%a4%e3%83%b3%e3%83%95%e3%83%a9%e3%81%a8%e3%81%aa%e3%82%8b%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%ab%e3%81%a4%e3%81%84%e3%81%a6&summary=2019%20European%20LLVM%20Developers%20Meeting%e3%82%92%e7%9c%ba%e3%82%81%e3%81%a6%e3%81%84%e3%81%9f%e3%82%89Google%e3%81%8cMulti-Level%20Intermediate%20Representation%20for%20Compiler%20Infrastructure%e3%81%a8%e8%a8%80%e3%81%86%20%e6%96%b0%e3%81%97%e3%81%84%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%ae%e7%99%ba%e8%a1%a8%e3%82%92%e3%81%97%e3%81%a6%e3%81%84%e3%81%9f%e3%81%ae%e3%81%a7%e6%b0%97%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e8%aa%bf%e3%81%b9%e3%81%a6%e3%81%bf%e3%81%9f%e3%80%82%e3%81%a9%e3%81%86%e3%82%82%e8%a4%87%e9%9b%91%e6%80%aa%e5%a5%87%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%84%e3%82%8bTensorFlow%e3%81%ae%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%82%a8%e3%82%b3%e3%82%b7%e3%82%b9%e3%83%86%e3%83%a0%e3%82%92%e4%b8%80%e3%81%a4%e3%81%ab%e3%81%be%e3%81%a8%e3%82%81%e3%82%8b%e6%96%b0%e3%81%97%e3%81%84%e3%82%a4%e3%83%b3%e3%83%95%e3%83%a9%e3%81%a8%e3%81%97%e3%81%a6%e3%81%ae%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%a3%e3%81%bd%e3%81%84%e3%80%82%20%e3%81%84%e3%81%8f%e3%81%a4%e3%81%8b%e3%81%ae%e9%96%a2%e9%80%a3%e3%81%99%e3%82%8b%e8%b3%87%e6%96%99%e3%82%92%e8%aa%ad%e3%82%93%e3%81%a0%e3%81%ae%e3%81%a7%e3%81%9d%e3%82%8c%e3%81%9e%e3%82%8c%e3%83%9d%e3%82%a4%e3%83%b3%e3%83%88%e3%82%92%e6%8a%9c%e7%b2%8b%e3%81%97%e3%82%88%e3%81%86%e3%81%a8%e6%80%9d%e3%81%86%e3%80%82%0atl%3bdr%20MLIR%28Multi-Level%20Intermediate%20Representation%29%e3%82%92%e4%b8%80%e8%a8%80%e3%81%a7%e8%a1%a8%e3%81%99%e3%81%a8%3a%0a%20TensorFlow%e3%81%ae%e6%96%b0%e3%81%97%e3%81%84SSA%e3%83%99%e3%83%bc%e3%82%b9%e3%81%ae%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%20%e8%a4%87%e9%9b%91%e5%8c%96%e3%81%97%e3%81%a6%e3%81%84%e3%82%8bTensorFlow%e3%81%ae%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e9%83%a1%e3%82%92%e7%b5%b1%e4%b8%80%e3%81%99%e3%82%8b%e7%9b%ae%e7%9a%84%e3%81%8c%e3%81%82%e3%82%8b%20LLVM%e3%81%ae%e3%83%87%e3%82%b6%e3%82%a4%e3%83%b3%e3%81%ab%e5%bc%b7%e3%81%8f%e5%bd%b1%e9%9f%bf%e3%82%92%e5%8f%97%e3%81%91%e3%81%a6%e3%81%8a%e3%82%8a%e3%80%81%e6%9f%94%e8%bb%9f%e3%81%aa%e3%82%a4%e3%83%b3%e3%83%95%e3%83%a9%e8%a8%ad%e8%a8%88%e3%81%a8%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%84%e3%82%8b%20%20%e4%bd%8d%e7%bd%ae%e4%bb%98%e3%81%91%e3%81%a8%e3%81%97%e3%81%a6%e3%81%af%e3%80%81%e4%b8%80%e3%81%a4%e4%b8%8a%e4%bd%8d%e3%83%ac%e3%82%a4%e3%83%a4%e3%82%92%e8%bf%bd%e5%8a%a0%e3%81%97%e3%81%a6%e5%85%b1%e9%80%9a%e3%83%95%e3%82%a9%e3%83%bc%e3%83%9e%e3%83%83%e3%83%88%e7%9a%84%e3%81%aa%e3%83%a1%e3%82%bf%e8%a1%a8%e7%8f%be%e3%82%92%e8%a8%ad%e8%a8%88%e3%81%97%e3%81%9f%e3%81%a8%e3%81%84%e3%81%86%e3%82%a4%e3%83%a1%e3%83%bc%e3%82%b8%e3%80%82%20%e3%81%93%e3%82%8c%e3%81%ab%e3%82%88%e3%81%a3%e3%81%a6%e5%90%84%e3%82%a2%e3%83%bc%e3%82%ad%e3%83%86%e3%82%af%e3%83%81%e3%83%a3%e6%af%8e%e3%81%ab%e7%8b%ac%e8%87%aa%e3%81%aeIR%e3%82%92%e7%94%9f%e6%88%90%e3%81%99%e3%82%8b%e5%bf%85%e8%a6%81%e3%81%8c%e3%81%aa%e3%81%8f%e3%81%aa%e3%81%a3%e3%81%a6%e3%80%81%e9%96%8b%e7%99%ba%e8%80%85%e3%81%ab%e3%81%a8%e3%81%a3%e3%81%a6%e3%81%afMLIR%e3%82%92%e6%84%8f%e8%ad%98%e3%81%99%e3%82%8c%e3%81%b0%e6%9f%94%e8%bb%9f%e3%81%ab%e9%96%8b%e7%99%ba%e3%81%8c%e8%a1%8c%e3%81%88%e3%82%8b%e3%81%a8%e3%81%84%e3%81%86%e3%82%82%e3%81%ae%e3%81%a0%e3%81%a8%e6%80%9d%e3%81%86%e3%80%82%0a%e8%a4%87%e9%9b%91%e5%8c%96%e3%81%97%e3%81%9fTF%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%20TensorFlow%e3%81%ab%e3%81%af%e3%81%84%e3%81%8f%e3%81%a4%e3%81%8b%e3%81%ae%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%81%8c%e5%ad%98%e5%9c%a8%e3%81%99%e3%82%8b%e3%80%82%e3%81%9d%e3%82%8c%e3%81%9e%e3%82%8cCPU%2fGPU%2fTPU%e3%80%81%e3%83%a2%e3%83%90%e3%82%a4%e3%83%ab%e3%81%a8%e3%81%84%e3%81%a3%e3%81%9f%e3%82%bf%e3%83%bc%e3%82%b2%e3%83%83%e3%83%88%e3%81%a8%e3%81%aa%e3%82%8b%e3%82%a2%e3%83%bc%e3%82%ad%e3%83%86%e3%82%af%e3%83%81%e3%83%a3%e6%af%8e%e3%81%ab%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%28XLA%2fTensorRT%2fnGraph%2fCoreML%2fTensorFlow%20Lite%20etc%29%e3%81%8c%e5%ad%98%e5%9c%a8%e3%81%97%e3%80%81%20%e3%81%93%e3%82%8c%e3%82%89%e3%81%af%e9%96%8b%e7%99%ba%e3%81%8c%e9%80%b2%e3%82%80%e3%81%a8%e5%85%b1%e3%81%ab%e8%a4%87%e9%9b%91%e5%8c%96%e3%81%97%e3%81%a6%e3%81%84%e3%81%a3%e3%81%9f%e3%80%82%0a%e3%81%9f%e3%81%a8%e3%81%88%e3%81%b0%e3%80%81TensorFlow%20XLA%e3%81%ae%e5%a0%b4%e5%90%88%e3%81%a0%e3%81%a8%20HLO%e3%81%a8%e8%a8%80%e3%81%86%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%ab%e5%a4%89%e6%8f%9b%e3%81%97%e3%81%a6%e3%82%b0%e3%83%a9%e3%83%95%e6%9c%80%e9%81%a9%e5%8c%96%e3%81%aa%e3%81%a9%e3%82%92%e5%ae%9f%e8%a1%8c%e3%81%97%e3%81%9f%e4%b8%8a%e3%81%a7%e3%80%81LLVM%20IR%e3%81%ab%e5%a4%89%e6%8f%9b%e3%81%97%e3%81%a6CPU%e3%82%84GPU%e5%90%91%e3%81%91%e3%81%ab%e3%82%b3%e3%83%bc%e3%83%89%e3%82%b8%e3%82%a7%e3%83%8d%e3%83%ac%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3%e3%82%92%e8%a1%8c%e3%81%a3%e3%81%9f%e3%82%8a%e3%80%81%20TPU%20IR%e3%81%ab%e5%a4%89%e6%8f%9b%e3%81%97%e3%81%a6TPU%e7%94%a8%e3%81%ab%e6%9c%80%e9%81%a9%e5%8c%96%e3%82%92%e3%81%8b%e3%81%91%e3%81%9f%e3%82%8a%e3%81%99%e3%82%8b%e3%80%82Tensor%20RT%e3%81%afNVIDIA%e3%81%8c%e5%87%ba%e3%81%97%e3%81%a6%e3%81%84%e3%82%8b%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%81%a0%e3%81%8c%e3%80%81NVIDIA%e3%81%aeGPU%e3%82%a2%e3%83%bc%e3%82%ad%e3%83%86%e3%82%af%e3%83%81%e3%83%a3%e3%82%92%e3%82%bf%e3%83%bc%e3%82%b2%e3%83%83%e3%83%88%e3%81%ab%e3%81%99%e3%82%8b%e5%a0%b4%e5%90%88%e3%81%af%e3%81%93%e3%82%8c%e3%82%92%e5%88%a9%e7%94%a8%e3%81%99%e3%82%8b%e3%81%a8NVIDIA%e7%89%b9%e5%8c%96%e3%81%ae%e6%9c%80%e9%81%a9%e5%8c%96%e3%81%8c%e8%a1%8c%e3%82%8f%e3%82%8c%e3%82%8b%e3%80%82%20%e3%83%a2%e3%83%90%e3%82%a4%e3%83%ab%e4%b8%8a%e3%81%a7Deep%20Learning%e3%82%92%e5%8b%95%e3%81%8b%e3%81%97%e3%81%9f%e3%81%84%e5%a0%b4%e5%90%88%e3%81%afTensorFlow%20Lite%e3%82%92%e5%88%a9%e7%94%a8%e3%81%99%e3%82%8b%e3%81%a0%e3%82%8d%e3%81%86%e3%80%82%0a%e3%81%93%e3%81%ae%e3%82%88%e3%81%86%e3%81%aa%e8%a4%87%e9%9b%91%e6%80%aa%e5%a5%87%e3%81%aa%e7%8a%b6%e6%85%8b%e3%81%af%e9%96%8b%e7%99%ba%e8%80%85%e3%82%92%e3%81%a8%e3%81%a6%e3%82%82%e5%9b%b0%e6%83%91%e3%81%95%e3%81%9b%e3%82%8b%e3%80%82%e3%81%a8%e8%a8%80%e3%81%86%e3%81%ae%e3%82%82%e3%80%81%e3%81%9d%e3%82%8c%e3%81%9e%e3%82%8c%e3%81%ae%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%81%a7%e3%81%af%e3%81%9d%e3%82%8c%e3%81%9e%e3%82%8c%e3%81%ae%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%82%92%e8%a8%ad%e8%a8%88%e3%81%97%e3%81%a6%e3%81%8a%e3%82%8a%e3%80%81%e3%81%9d%e3%82%8c%e3%82%89%e3%81%af%e3%81%a8%e3%81%a6%e3%82%82%e4%bc%bc%e3%81%a6%e3%81%84%e3%82%8b%e3%81%8c%e6%b1%ba%e3%81%97%e3%81%a6%e5%90%8c%e3%81%98%e3%82%82%e3%81%ae%e3%81%a7%e3%81%af%e3%81%aa%e3%81%84%e3%81%ae%e3%81%a7%e3%80%81%20%e8%a4%87%e6%95%b0%e3%81%ae%e3%82%a2%e3%83%bc%e3%82%ad%e3%83%86%e3%82%af%e3%83%81%e3%83%a3%e3%82%92%e3%82%bf%e3%83%bc%e3%82%b2%e3%83%83%e3%83%88%e3%81%ab%e3%81%97%e3%81%9f%e5%a0%b4%e5%90%88%e3%81%af%e4%b8%80%e3%81%a4%e4%b8%80%e3%81%a4%e6%9c%80%e9%81%a9%e5%8c%96%e3%82%92%e6%8e%9b%e3%81%91%e7%9b%b4%e3%81%97%e3%80%81path%e5%a4%89%e6%8f%9b%e3%82%92%e8%a1%8c%e3%82%8f%e3%81%aa%e3%81%91%e3%82%8c%e3%81%b0%e3%81%aa%e3%82%89%e3%81%aa%e3%81%84%e3%80%82%e3%81%be%e3%81%9f%e3%80%81%e3%81%9d%e3%82%8c%e3%81%9e%e3%82%8c%e3%81%a7%e3%82%a8%e3%83%a9%e3%83%bc%e3%83%a1%e3%83%83%e3%82%bb%e3%83%bc%e3%82%b8%e3%81%ae%e8%a8%ad%e8%a8%88%e3%82%82%e9%81%95%e3%81%86%e3%81%ae%e3%81%a7%e3%80%81%e9%96%8b%e7%99%ba%e8%80%85%e3%82%92%e3%81%a8%e3%81%a6%e3%82%82%e5%9b%b0%e6%83%91%e3%81%95%e3%81%9b%e3%82%8b%e3%81%a0%e3%82%8d%e3%81%86%e3%80%82%0aMLIR%e3%81%a8%e3%81%af%20MLIR%e3%81%af%e3%81%93%e3%82%8c%e3%82%89%e3%81%ae%e5%95%8f%e9%a1%8c%e3%82%92%e8%a7%a3%e6%b1%ba%e3%81%99%e3%82%8b%e6%96%b0%e3%81%97%e3%81%84%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%a8%e3%81%97%e3%81%a6%e8%a8%ad%e8%a8%88%e3%81%95%e3%82%8c%e3%81%a6%e3%81%84%e3%82%8b%e3%80%82%e6%9c%80%e6%96%b0%e3%81%ae%e6%9c%80%e9%81%a9%e5%8c%96%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%81%ae%e3%81%9f%e3%82%81%e3%81%ae%e6%9f%94%e8%bb%9f%e3%81%aa%e3%82%a4%e3%83%b3%e3%83%95%e3%83%a9%e3%81%a7%e3%80%81%e3%81%be%e3%81%9f%e3%80%81LLVM%e3%81%ae%e3%83%87%e3%82%b6%e3%82%a4%e3%83%b3%e3%81%ab%e5%bc%b7%e3%81%8f%e5%bd%b1%e9%9f%bf%e3%82%92%e5%8f%97%e3%81%91%e3%81%a6%e3%81%84%e3%82%8b%e3%80%82%20%e3%81%9f%e3%81%a8%e3%81%88%e3%81%b0%e4%bb%a5%e4%b8%8b%e3%81%ae%e3%82%88%e3%81%86%e3%81%aa%e3%81%a8%e3%81%93%e3%82%8d%e3%81%afLLVM%e3%81%a8%e4%bc%bc%e3%81%9f%e3%83%87%e3%82%b6%e3%82%a4%e3%83%b3%e3%81%a8%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%84%e3%82%8b%3a%0a%20SSA%e3%83%99%e3%83%bc%e3%82%b9%e3%81%aa%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%20%e6%9f%94%e8%bb%9f%e3%81%aa%e5%9e%8b%e3%82%b7%e3%82%b9%e3%83%86%e3%83%a0%20tree%20address%20%e6%a7%8b%e9%80%a0%e3%81%8c%e5%90%8c%e3%81%98%28Module%2fFunction%2fBlock%2fInstruction%29%20%e5%90%8c%e3%81%98%e5%8d%98%e4%bd%8d%e3%81%ae%e4%b8%ad%e3%81%a7%e8%a4%87%e6%95%b0%e3%83%ac%e3%83%99%e3%83%ab%e3%81%ae%e6%8a%bd%e8%b1%a1%e5%8c%96%e3%82%92%e7%b5%84%e3%81%bf%e5%90%88%e3%82%8f%e3%81%9b%e3%81%9f%e3%82%b0%e3%83%a9%e3%83%95%e3%81%ae%e8%a1%a8%e7%8f%be%2f%e5%88%86%e6%9e%90%2f%e5%a4%89%e6%8f%9b%e3%81%8c%e5%8f%af%e8%83%bd%20%20%e3%81%be%e3%81%9f%e3%80%81%e3%81%93%e3%82%8c%e3%82%89%e3%81%ae%e6%8a%bd%e8%b1%a1%e6%a6%82%e5%bf%b5%e3%81%ab%e3%81%af%e3%80%81TensorFlow%e6%93%8d%e4%bd%9c%e3%80%81%e5%85%a5%e3%82%8c%e5%ad%90%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%9f%e5%a4%9a%e9%9d%a2%e4%bd%93%e3%83%ab%e3%83%bc%e3%83%97%e9%a0%98%e5%9f%9f%e3%80%81%e3%81%95%e3%82%89%e3%81%ab%e3%81%afLLVM%e5%91%bd%e4%bb%a4%e3%80%81%e3%81%95%e3%82%89%e3%81%ab%e3%81%af%e5%9b%ba%e5%ae%9a%e3%83%8f%e3%83%bc%e3%83%89%e3%82%a6%e3%82%a7%e3%82%a2%e6%93%8d%e4%bd%9c%e3%81%a8%e3%82%bf%e3%82%a4%e3%83%97%e3%81%8c%e5%90%ab%e3%81%be%e3%82%8c%e3%82%8b%e3%80%82%0a%e5%85%88%e3%81%ab%e3%82%82%e6%9b%b8%e3%81%84%e3%81%9f%e3%81%8cTensorFlow%e3%81%ab%e3%81%af%e3%81%84%e3%81%8f%e3%81%a4%e3%81%8b%e3%81%ae%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%81%a8%e3%81%9d%e3%82%8c%e3%81%ab%e7%b4%90%e3%81%a5%e3%81%8f%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%8c%e3%81%82%e3%82%8a%e3%80%81%20%e3%81%93%e3%82%8c%e3%82%89%e3%81%af%e6%bc%94%e7%ae%97%e5%ad%90%e3%81%ae%e3%82%bb%e3%83%9e%e3%83%b3%e3%83%86%e3%82%a3%e3%82%af%e3%82%b9%e3%81%8c%e7%95%b0%e3%81%aa%e3%82%8b%e3%81%9f%e3%82%81%e3%80%81%e8%a8%80%e8%aa%9e%e3%81%ae%e5%90%84%e5%b1%a4%e3%81%94%e3%81%a8%e3%81%ab%e6%a7%8b%e7%af%89%e3%81%99%e3%82%8b%e8%a1%a8%e7%8f%be%e3%81%8c%e7%95%b0%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%84%e3%82%8b%e3%80%82%20MLIR%e3%81%af%e3%81%9d%e3%82%8c%e3%82%89%e3%81%ae%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%ab%e5%af%be%e3%81%99%e3%82%8b%e3%83%a1%e3%82%bf%e8%a1%a8%e7%8f%be%e7%9a%84%e3%81%aa%e4%bd%8d%e7%bd%ae%e4%bb%98%e3%81%91%e3%81%a7%e3%80%81%e5%85%b1%e9%80%9a%e3%83%95%e3%82%a9%e3%83%bc%e3%83%9e%e3%83%83%e3%83%88%e5%8c%96%e3%82%92%e3%81%97%e3%82%88%e3%81%86%e3%81%a8%e3%81%99%e3%82%8b%e3%82%a4%e3%83%b3%e3%83%95%e3%83%a9%e3%81%a8%e3%81%97%e3%81%a6%e3%81%ae%e6%96%b9%e9%87%9d%e3%82%92%e6%8c%87%e3%81%97%e3%81%a6%e3%81%84%e3%82%8b%e3%80%82%0aMLIR%20Dialects%20MLIR%e3%81%af%e4%b8%8b%e8%a8%98%e3%82%92%e3%82%bf%e3%83%bc%e3%82%b2%e3%83%83%e3%83%88%e3%81%a8%e3%81%97%e3%81%a6%e3%82%b5%e3%83%9d%e3%83%bc%e3%83%88%e3%81%97%e3%81%a6%e3%81%84%e3%82%8b%3a%0a%20TensorFlow%20IR%2c%20which%20represents%20all%20things%20possible%20in%20TensorFlow%20graphs%20XLA%20HLO%20IR%2c%20which%20is%20designed%20to%20take%20advantage%20of%20XLA%e2%80%99s%20compilation%20abilities%20%28with%20output%20to%2c%20among%20other%20things%2c%20TPUs%29%20An%20experimental%20affine%20dialect%2c%20which%20focuses%20on%20polyhedral%20representations%20and%20optimizations%20LLVM%20IR%2c%20which%20has%20a%201%3a1%20mapping%20between%20it%20and%20LLVM%e2%80%99s%20own%20representation%2c%20allowing%20MLIR%20to%20emit%20GPU%20and%20CPU%20code%20through%20LLVM%20TensorFlow%20Lite%2c%20which%20will%20translate%20to%20running%20code%20on%20mobile%20platforms%20%20Dialects%e3%81%af%e3%82%ab%e3%82%b9%e3%82%bf%e3%83%a0%e5%9e%8b%e3%82%92%e5%ae%9a%e7%be%a9%e3%81%99%e3%82%8b%e3%81%93%e3%81%a8%e3%81%8c%e3%81%a7%e3%81%8d%e3%82%8b%e3%80%82%20%e3%81%93%e3%82%8c%e3%81%ab%e3%82%88%e3%82%8a%e5%b0%86%e6%9d%a5%e7%9a%84%e3%81%ab%e3%81%a9%e3%81%aeDialects%e3%81%a7%e3%81%82%e3%82%8c%e3%80%81LLVM%20IR%e5%9e%8b%e3%82%b7%e3%82%b9%e3%83%86%e3%83%a0%28%e3%83%95%e3%82%a1%e3%83%bc%e3%82%b9%e3%83%88%e3%82%af%e3%83%a9%e3%82%b9%e3%81%ae%e9%9b%86%e5%90%88%e4%bd%93%e3%82%92%e6%8c%81%e3%81%a4%29%e3%80%81%e9%87%8f%e5%ad%90%e5%8c%96%e5%9e%8b%e3%81%ae%e3%82%88%e3%81%86%e3%81%aaML%e6%9c%80%e9%81%a9%e5%8c%96%e3%82%a2%e3%82%af%e3%82%bb%e3%83%a9%e3%83%ac%e3%83%bc%e3%82%bf%e3%81%ab%e3%81%a8%e3%81%a3%e3%81%a6%e9%87%8d%e8%a6%81%e3%81%aa%e3%83%89%e3%83%a1%e3%82%a4%e3%83%b3%e6%8a%bd%e8%b1%a1%e5%8c%96%e3%80%81%e3%81%9d%e3%81%97%e3%81%a6Swift%e3%81%be%e3%81%9f%e3%81%afClang%e5%9e%8b%e3%82%b7%e3%82%b9%e3%83%86%e3%83%a0%e3%81%8c%e5%be%97%e3%82%89%e3%82%8c%e3%82%8b%e3%80%82&source=rafed123.github.io"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on LinkedIn. Opens in a new window." >
+	        <img src=/img/icons/45px/linkedin.png>
+	    </a>
+
+	    <a  href="mailto:?subject=MLIR%3a%20%e6%96%b0%e3%81%97%e3%81%84TF%e3%82%b3%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a9%e3%82%a4%e3%83%b3%e3%83%95%e3%83%a9%e3%81%a8%e3%81%aa%e3%82%8b%e4%b8%ad%e9%96%93%e8%a1%a8%e7%8f%be%e3%81%ab%e3%81%a4%e3%81%84%e3%81%a6&amp;body=Check out this site https%3a%2f%2fsott0n.github.io%2fpost%2fmlir%2f"
+	        title="Share via Email. Opens in a new window." >
+	        <img src=/img/icons/45px/mail.png>
+	    </a>
+	</div>
+</div>
+
+
+<br>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        var disqus_shortname = '';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+        </div>
+    </div>
+<script async src="https://cse.google.com/cse.js?cx=google-search-code"></script>
+<gcse:searchresults-only></gcse:searchresults-only>
+
+
+<footer class="footer has-background-dark">
+    <div class="content has-text-centered has-text-white">
+        <p>
+            © 2020 Ramium. Powered by
+            <a class="has-text-light" href="https://github.com/gohugoio/hugo" target="_blank">
+            Hugo</a>. Theme
+            <a class="has-text-light" href="https://github.com/rafed123/ramium/" target="_blank">
+                Ramium.
+            </a>
+        </p>
+    </div>
+</footer>
+</body>
+
+</html>
