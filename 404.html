@@ -2,7 +2,7 @@
 <html lang="ja">
 
 <head><title>
-    Ml | 
+    404 Page Not Found | 
     
     SE Can&#39;t Code</title>
 
@@ -12,20 +12,20 @@
     ">
 
 
-<meta property="og:title" content="ml" />
+<meta property="og:title" content="404 Page not found" />
 <meta property="og:description" content="This is a Software Engineer, not System Engineer." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://sott0n.github.io/tags/ml/" />
-<meta property="og:updated_time" content="2019-04-19T07:50:26+09:00" />
+<meta property="og:url" content="https://sott0n.github.io/404.html" />
+
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="ml"/>
+<meta name="twitter:title" content="404 Page not found"/>
 <meta name="twitter:description" content="This is a Software Engineer, not System Engineer."/>
 
-<meta itemprop="name" content="ml">
+<meta itemprop="name" content="404 Page not found">
 <meta itemprop="description" content="This is a Software Engineer, not System Engineer.">
 
-<link rel="canonical" href="https://sott0n.github.io/tags/ml/" />
+<link rel="canonical" href="https://sott0n.github.io/404.html" />
 
 <link rel="icon" type="image/png" href="https://sott0n.github.io/image/favicon.ico">
 
@@ -113,14 +113,100 @@
       
     </div>
   </div>
-</nav><div class="columns is-centered">
-        <div id="page-body" class="column is-7">
+</nav>
 
-<div class="content">
-    <h1>Ml</h1>
-</div>
 
-<div class="blog-brief">
+<section class="hero has-text-centered">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title is-1">
+                404! Page not found...
+            </h1>
+
+            <br><br>
+
+            <h1 class="subtitle is-4">
+                Here's what may have happened:
+            </h1>
+            <h1 class="subtitle is-6">
+                1. The page was moved to another location. You can search for it above.
+            </h1>
+            <h1 class="subtitle is-6">
+                2. The page was removed. You can read another one from below.
+            </h1>
+            <h1 class="subtitle is-6">
+                3. This page never existed
+            </h1>
+        </div>
+    </div>
+</section><div class="columns is-centered">
+    <div class="column is-7">
+        <div class="content">
+            <a href="/posts/">
+                <h1 class="is-3">Recent posts</h1>
+            </a>
+        </div>
+        <div class="blog-brief">
+    <a href="/post/x86_64_basic/">
+        <h3 class="title is-4">
+            X86_64: レジスタについて
+        </h3>
+    </a>
+
+    <div class="level is-mobile details">
+        <div class="level-left">
+
+            
+            <div class="level-item">
+                <a href="/post/x86_64_basic/">
+                    <p class="subtitle info date">May 1, 2019
+                    </p>
+                </a>
+            </div>
+            
+
+
+            <div class="level-item">
+                <a href="/post/x86_64_basic/">
+                    <p class="subtitle info">
+                        17 mins read
+                    </p>
+                </a>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            
+            <a class="tag is-rounded" href="/tags/x86_64">X86_64</a>
+            
+        </div>
+    </div>
+
+    <div>
+        
+
+        <div>
+            <a href="/post/x86_64_basic/">
+                <p class="summary">
+                    CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
+レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
+ 汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。
+   レジスタ名 内容     rax 汎用レジスタ   rbx 汎用レジスタ   rcx 汎用レジスタ   rdx 汎用レジスタ   rsi 汎用レジスタ   rdi 汎用レジスタ   rbp 汎用レジスタ   rsp 汎用レジスタ兼スタックポインタ   r8 汎用レジスタ   r9 汎用レジスタ   r10 汎用レジスタ   r11 汎用レジスタ   r12 汎用レジスタ   r13 汎用レジスタ   r14 汎用レジスタ   r15 汎用レジスタ   rip プログラムカウンタ   eflags フラグレジスタ   cs セグメントレジスタ   ss セグメントレジスタ   ds セグメントレジスタ   es セグメントレジスタ   fs セグメントレジスタ   gs セグメントレジスタ    このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。
+                    
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <div class="level is-mobile continue-reading">
+        <div class="level-left">
+        </div>
+        <div class="level-right">
+            <a href="/post/x86_64_basic/">Continue reading <i class="fa fa-angle-double-right"
+                    aria-hidden="true"></i></a>
+        </div>
+    </div>
+    <hr>
+</div><div class="blog-brief">
     <a href="/post/mlir/">
         <h3 class="title is-4">
             MLIR: 新しいTFコンパイラインフラとなる中間表現について
@@ -185,6 +271,79 @@ MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
         </div>
         <div class="level-right">
             <a href="/post/mlir/">Continue reading <i class="fa fa-angle-double-right"
+                    aria-hidden="true"></i></a>
+        </div>
+    </div>
+    <hr>
+</div><div class="blog-brief">
+    <a href="/post/ergodox/">
+        <h3 class="title is-4">
+            ErgoDoxEZキーボードを導入する
+        </h3>
+    </a>
+
+    <div class="level is-mobile details">
+        <div class="level-left">
+
+            
+            <div class="level-item">
+                <a href="/post/ergodox/">
+                    <p class="subtitle info date">Apr 14, 2019
+                    </p>
+                </a>
+            </div>
+            
+
+
+            <div class="level-item">
+                <a href="/post/ergodox/">
+                    <p class="subtitle info">
+                        13 mins read
+                    </p>
+                </a>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            
+        </div>
+    </div>
+
+    <div>
+        
+
+        <div>
+            <a href="/post/ergodox/">
+                <p class="summary">
+                    分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
+tl;dr ErgoDox EZの感想を述べると、
+ ErgoDox EZの設定自体はそんなに難しくない ただしJISキーボードを想定する場合は結構辛い 自分好みにキーバインドが設定できるのでかなり楽しい  慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。
+ErgoDox EZとは ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。
+https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/
+自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。 購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。
+キーバインド条件 ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。
+自分の場合は下記の条件でキーバインドを設定した:
+ WindowsとMacbookの両方で利用できること JISキーボードであること  自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。 自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。 当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。
+また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。 ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、 Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。
+キーバインドの設定方法 ErgoDox EZはTeensy USB Development Board と言うソフトウェアを使い、 コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。
+やり方はシンプルで下記のやり方で設定できる:
+ Teensyをダウンロード ファームウェアをコンパイルして.hexを生成 Teensyに生成した.hexを流し込む  ここではまず、ファームウェアのコンパイル方法から説明する。
+ファームウェアのコンパイル まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)
+brew tap osx-cross/avr brew install avr-libc brew install dfu-programmer そのあとは、https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ezのソースコードをダウンロードし、 keymaps/defaultというディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下のkeymap.cと同様のファイルを作成する（コピーして編集するといい）。 それをmake KEYMAP=[your_name]でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。
+自分でkeymap.cを編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。
+https://configure.ergodox-ez.com/layouts/default/latest/0
+このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、Print layoutから印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。
+JISキーボード設定 さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。 書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。 たとえば、JISの場合の@はUSの場合だと[と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。
+                    
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <div class="level is-mobile continue-reading">
+        <div class="level-left">
+        </div>
+        <div class="level-right">
+            <a href="/post/ergodox/">Continue reading <i class="fa fa-angle-double-right"
                     aria-hidden="true"></i></a>
         </div>
     </div>
@@ -259,28 +418,13 @@ Model versioning Model versioningはONNX変換して配布するユーザーに�
     <hr>
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <div class="content">
+            <a href="/posts/">
+                <h4 class="has-text-centered seeall">See all</h4>
+            </a>
         </div>
     </div>
+</div>
 <script async src="https://cse.google.com/cse.js?cx=google-search-code"></script>
 <gcse:searchresults-only></gcse:searchresults-only>
 
