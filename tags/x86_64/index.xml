@@ -6,13 +6,14 @@
     <description>Recent content in x86_64 on SE Can&#39;t Code</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
+    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
     <lastBuildDate>Wed, 01 May 2019 22:06:41 +0900</lastBuildDate><atom:link href="https://sott0n.github.io/tags/x86_64/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>x86_64: レジスタについて</title>
-      <link>https://sott0n.github.io/post/x86_64_basic/</link>
+      <link>https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</link>
       <pubDate>Wed, 01 May 2019 22:06:41 +0900</pubDate>
       
-      <guid>https://sott0n.github.io/post/x86_64_basic/</guid>
+      <guid>https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</guid>
       <description>CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
 レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
  汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。

@@ -6,13 +6,14 @@
     <description>Recent content in LLVM on SE Can&#39;t Code</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
+    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
     <lastBuildDate>Fri, 19 Apr 2019 07:50:26 +0900</lastBuildDate><atom:link href="https://sott0n.github.io/tags/llvm/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>MLIR: 新しいTFコンパイラインフラとなる中間表現について</title>
-      <link>https://sott0n.github.io/post/mlir/</link>
+      <link>https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</link>
       <pubDate>Fri, 19 Apr 2019 07:50:26 +0900</pubDate>
       
-      <guid>https://sott0n.github.io/post/mlir/</guid>
+      <guid>https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</guid>
       <description>2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
 tl;dr MLIR(Multi-Level Intermediate Representation)を一言で表すと:
  TensorFlowの新しいSSAベースの中間表現 複雑化しているTensorFlowのコンパイラ郡を統一する目的がある LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている  位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。 これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。

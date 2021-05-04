@@ -1,113 +1,42 @@
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/post/</loc>
-	    <lastmod>2019-05-01</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/</loc>
-	    <lastmod>2019-05-01</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/tags/</loc>
-	    <lastmod>2019-05-01</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/tags/x86_64/</loc>
-	    <lastmod>2019-05-01</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/post/x86_64_basic/</loc>
-	    <lastmod>2019-05-01</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/tags/llvm/</loc>
-	    <lastmod>2019-04-19</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/tags/ml/</loc>
-	    <lastmod>2019-04-19</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/post/mlir/</loc>
-	    <lastmod>2019-04-19</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/post/ergodox/</loc>
-	    <lastmod>2019-04-14</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>https://sott0n.github.io/post/onnx_reading_versioning/</loc>
-	    <lastmod>2019-03-06</lastmod>
-        
-
-        
-	  </url>
-	  
-  
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://sott0n.github.io/posts/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/tags/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/tags/x86_64/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</loc>
+    <lastmod>2019-05-01T22:06:41+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/tags/llvm/</loc>
+    <lastmod>2019-04-19T07:50:26+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/tags/ml/</loc>
+    <lastmod>2019-04-19T07:50:26+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</loc>
+    <lastmod>2019-04-19T07:50:26+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/posts/2019/04/ergodoxez%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89%E3%82%92%E5%B0%8E%E5%85%A5%E3%81%99%E3%82%8B/</loc>
+    <lastmod>2019-04-14T01:50:17+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/posts/2019/03/onnx%E3%81%AEdoc%E3%82%92%E8%AA%AD%E3%82%80-onnx-versioning/</loc>
+    <lastmod>2019-03-06T09:44:12+09:00</lastmod>
+  </url><url>
+    <loc>https://sott0n.github.io/about/</loc>
+    <priority>0</priority>
+  </url><url>
+    <loc>https://sott0n.github.io/blog/</loc>
+  </url><url>
+    <loc>https://sott0n.github.io/series/</loc>
+  </url>
 </urlset>

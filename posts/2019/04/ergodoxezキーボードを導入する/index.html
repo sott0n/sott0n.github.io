@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
+tl;dr ErgoDox EZの感想を述べると、
+ ErgoDox EZの設定自体はそんなに難しくない ただしJISキーボードを想定する場合は結構辛い 自分好みにキーバインドが設定できるのでかなり楽しい  慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。
+ErgoDox EZとは ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。
+https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/
+自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。 購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。
+キーバインド条件 ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。
+自分の場合は下記の条件でキーバインドを設定した:
+ WindowsとMacbookの両方で利用できること JISキーボードであること  自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。 自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。 当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。
+また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。 ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、 Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。
+キーバインドの設定方法 ErgoDox EZはTeensy USB Development Board と言うソフトウェアを使い、 コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。
+やり方はシンプルで下記のやり方で設定できる:
+ Teensyをダウンロード ファームウェアをコンパイルして.hexを生成 Teensyに生成した.hexを流し込む  ここではまず、ファームウェアのコンパイル方法から説明する。
+ファームウェアのコンパイル まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)
+brew tap osx-cross/avr brew install avr-libc brew install dfu-programmer そのあとは、https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ezのソースコードをダウンロードし、 keymaps/defaultというディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下のkeymap.cと同様のファイルを作成する（コピーして編集するといい）。 それをmake KEYMAP=[your_name]でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。
+自分でkeymap.cを編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。
+https://configure.ergodox-ez.com/layouts/default/latest/0
+このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、Print layoutから印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。
+JISキーボード設定 さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。 書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。 たとえば、JISの場合の@はUSの場合だと[と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://sott0n.github.io/posts/2019/04/ergodoxez%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89%E3%82%92%E5%B0%8E%E5%85%A5%E3%81%99%E3%82%8B/" />
+
+
+    <title>
+        
+            ErgoDoxEZキーボードを導入する :: SE Can&#39;t Code  — This is a Software Engineer, not System Engineer.
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="https://sott0n.github.io/main.c46cbca46fa76c0fcd3da8313ecf4adee5fb3ffb0288c0902d7e90aead220d79.css">
+
+
+
+
+
+
+<meta itemprop="name" content="ErgoDoxEZキーボードを導入する">
+<meta itemprop="description" content="分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
+tl;dr ErgoDox EZの感想を述べると、
+ ErgoDox EZの設定自体はそんなに難しくない ただしJISキーボードを想定する場合は結構辛い 自分好みにキーバインドが設定できるのでかなり楽しい  慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。
+ErgoDox EZとは ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。
+https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/
+自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。 購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。
+キーバインド条件 ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。
+自分の場合は下記の条件でキーバインドを設定した:
+ WindowsとMacbookの両方で利用できること JISキーボードであること  自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。 自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。 当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。
+また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。 ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、 Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。
+キーバインドの設定方法 ErgoDox EZはTeensy USB Development Board と言うソフトウェアを使い、 コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。
+やり方はシンプルで下記のやり方で設定できる:
+ Teensyをダウンロード ファームウェアをコンパイルして.hexを生成 Teensyに生成した.hexを流し込む  ここではまず、ファームウェアのコンパイル方法から説明する。
+ファームウェアのコンパイル まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)
+brew tap osx-cross/avr brew install avr-libc brew install dfu-programmer そのあとは、https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ezのソースコードをダウンロードし、 keymaps/defaultというディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下のkeymap.cと同様のファイルを作成する（コピーして編集するといい）。 それをmake KEYMAP=[your_name]でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。
+自分でkeymap.cを編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。
+https://configure.ergodox-ez.com/layouts/default/latest/0
+このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、Print layoutから印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。
+JISキーボード設定 さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。 書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。 たとえば、JISの場合の@はUSの場合だと[と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。"><meta itemprop="datePublished" content="2019-04-14T01:50:17&#43;09:00" />
+<meta itemprop="dateModified" content="2019-04-14T01:50:17&#43;09:00" />
+<meta itemprop="wordCount" content="191"><meta itemprop="image" content="https://sott0n.github.io/"/>
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://sott0n.github.io/"/>
+
+<meta name="twitter:title" content="ErgoDoxEZキーボードを導入する"/>
+<meta name="twitter:description" content="分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
+tl;dr ErgoDox EZの感想を述べると、
+ ErgoDox EZの設定自体はそんなに難しくない ただしJISキーボードを想定する場合は結構辛い 自分好みにキーバインドが設定できるのでかなり楽しい  慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。
+ErgoDox EZとは ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。
+https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/
+自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。 購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。
+キーバインド条件 ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。
+自分の場合は下記の条件でキーバインドを設定した:
+ WindowsとMacbookの両方で利用できること JISキーボードであること  自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。 自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。 当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。
+また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。 ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、 Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。
+キーバインドの設定方法 ErgoDox EZはTeensy USB Development Board と言うソフトウェアを使い、 コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。
+やり方はシンプルで下記のやり方で設定できる:
+ Teensyをダウンロード ファームウェアをコンパイルして.hexを生成 Teensyに生成した.hexを流し込む  ここではまず、ファームウェアのコンパイル方法から説明する。
+ファームウェアのコンパイル まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)
+brew tap osx-cross/avr brew install avr-libc brew install dfu-programmer そのあとは、https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ezのソースコードをダウンロードし、 keymaps/defaultというディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下のkeymap.cと同様のファイルを作成する（コピーして編集するといい）。 それをmake KEYMAP=[your_name]でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。
+自分でkeymap.cを編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。
+https://configure.ergodox-ez.com/layouts/default/latest/0
+このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、Print layoutから印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。
+JISキーボード設定 さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。 書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。 たとえば、JISの場合の@はUSの場合だと[と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。"/>
+
+
+
+
+    <meta property="og:title" content="ErgoDoxEZキーボードを導入する" />
+<meta property="og:description" content="分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
+tl;dr ErgoDox EZの感想を述べると、
+ ErgoDox EZの設定自体はそんなに難しくない ただしJISキーボードを想定する場合は結構辛い 自分好みにキーバインドが設定できるのでかなり楽しい  慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。
+ErgoDox EZとは ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。
+https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/
+自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。 購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。
+キーバインド条件 ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。
+自分の場合は下記の条件でキーバインドを設定した:
+ WindowsとMacbookの両方で利用できること JISキーボードであること  自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。 自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。 当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。
+また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。 ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、 Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。
+キーバインドの設定方法 ErgoDox EZはTeensy USB Development Board と言うソフトウェアを使い、 コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。
+やり方はシンプルで下記のやり方で設定できる:
+ Teensyをダウンロード ファームウェアをコンパイルして.hexを生成 Teensyに生成した.hexを流し込む  ここではまず、ファームウェアのコンパイル方法から説明する。
+ファームウェアのコンパイル まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)
+brew tap osx-cross/avr brew install avr-libc brew install dfu-programmer そのあとは、https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ezのソースコードをダウンロードし、 keymaps/defaultというディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下のkeymap.cと同様のファイルを作成する（コピーして編集するといい）。 それをmake KEYMAP=[your_name]でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。
+自分でkeymap.cを編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。
+https://configure.ergodox-ez.com/layouts/default/latest/0
+このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、Print layoutから印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。
+JISキーボード設定 さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。 書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。 たとえば、JISの場合の@はUSの場合だと[と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://sott0n.github.io/posts/2019/04/ergodoxez%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89%E3%82%92%E5%B0%8E%E5%85%A5%E3%81%99%E3%82%8B/" /><meta property="og:image" content="https://sott0n.github.io/"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-04-14T01:50:17&#43;09:00" />
+<meta property="article:modified_time" content="2019-04-14T01:50:17&#43;09:00" /><meta property="og:site_name" content="SE Can&#39;t Code" />
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2019-04-14 01:50:17 &#43;0900 JST" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://sott0n.github.io/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">SE Can&#39;t Code</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://sott0n.github.io/about">About</a></li><li><a href="https://sott0n.github.io/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        One minute
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://sott0n.github.io/posts/2019/04/ergodoxez%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89%E3%82%92%E5%B0%8E%E5%85%A5%E3%81%99%E3%82%8B/">ErgoDoxEZキーボードを導入する</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p><img src="https://sott0n.github.io/image/ergodox_ez.jpg" alt="image"></p>
+<p>分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。
+画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。</p>
+<h2 id="tldr">tl;dr</h2>
+<p>ErgoDox EZの感想を述べると、</p>
+<ul>
+<li>ErgoDox EZの設定自体はそんなに難しくない</li>
+<li>ただしJISキーボードを想定する場合は結構辛い</li>
+<li>自分好みにキーバインドが設定できるのでかなり楽しい</li>
+</ul>
+<p>慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。</p>
+<h2 id="ergodox-ezとは">ErgoDox EZとは</h2>
+<p>ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。</p>
+<p><a href="https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/">https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/</a></p>
+<p>自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。
+購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。</p>
+<h2 id="キーバインド条件">キーバインド条件</h2>
+<p>ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。</p>
+<p>自分の場合は下記の条件でキーバインドを設定した:</p>
+<ul>
+<li>WindowsとMacbookの両方で利用できること</li>
+<li>JISキーボードであること</li>
+</ul>
+<p>自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。
+自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。
+当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。</p>
+<p>また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。
+ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、
+Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。</p>
+<h2 id="キーバインドの設定方法">キーバインドの設定方法</h2>
+<p>ErgoDox EZは<a href="https://www.pjrc.com/teensy/">Teensy USB Development Board </a>と言うソフトウェアを使い、
+コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。</p>
+<p>やり方はシンプルで下記のやり方で設定できる:</p>
+<ul>
+<li>Teensyをダウンロード</li>
+<li>ファームウェアをコンパイルして<code>.hex</code>を生成</li>
+<li>Teensyに生成した.hexを流し込む</li>
+</ul>
+<p>ここではまず、ファームウェアのコンパイル方法から説明する。</p>
+<h3 id="ファームウェアのコンパイル">ファームウェアのコンパイル</h3>
+<p>まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)</p>
+<pre><code>brew tap osx-cross/avr
+brew install avr-libc
+brew install dfu-programmer
+</code></pre><p>そのあとは、<code>https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ez</code>のソースコードをダウンロードし、
+<code>keymaps/default</code>というディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下の<code>keymap.c</code>と同様のファイルを作成する（コピーして編集するといい）。
+それを<code>make KEYMAP=[your_name]</code>でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。</p>
+<p>自分で<code>keymap.c</code>を編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。</p>
+<p><a href="https://configure.ergodox-ez.com/layouts/default/latest/0">https://configure.ergodox-ez.com/layouts/default/latest/0</a></p>
+<p>このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、<code>Print layout</code>から印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。</p>
+<h3 id="jisキーボード設定">JISキーボード設定</h3>
+<p>さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。
+書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。
+たとえば、JISの場合の<code>@</code>はUSの場合だと<code>[</code>と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。</p>
+<p>JISキーボードとUSキーボードの違いは下記の通りである:</p>
+<table>
+<thead>
+<tr>
+<th>JIS</th>
+<th>US</th>
+<th>JIS(Shift)</th>
+<th>US(Shift)</th>
+<th>Ergodox</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>!</td>
+<td>!</td>
+<td>KC_1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td>&quot;</td>
+<td>@</td>
+<td>KC_2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3</td>
+<td>#</td>
+<td>#</td>
+<td>KC_3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>$</td>
+<td>$</td>
+<td>KC_4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>5</td>
+<td>%</td>
+<td>%</td>
+<td>KC_5</td>
+</tr>
+<tr>
+<td>6</td>
+<td>6</td>
+<td>&amp;</td>
+<td>^</td>
+<td>KC_6</td>
+</tr>
+<tr>
+<td>7</td>
+<td>7</td>
+<td>'</td>
+<td>&amp;</td>
+<td>KC_7</td>
+</tr>
+<tr>
+<td>8</td>
+<td>8</td>
+<td>(</td>
+<td>*</td>
+<td>KC_8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>9</td>
+<td>)</td>
+<td>(</td>
+<td>KC_9</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>無</td>
+<td>)</td>
+<td>KC_0</td>
+</tr>
+<tr>
+<td>-</td>
+<td>-</td>
+<td>=</td>
+<td>_</td>
+<td>KC_MINS</td>
+</tr>
+<tr>
+<td>^</td>
+<td>=</td>
+<td>~</td>
+<td>+</td>
+<td>KC_EQL</td>
+</tr>
+<tr>
+<td>\</td>
+<td>無</td>
+<td>｜</td>
+<td>無</td>
+<td>KC_JYEN</td>
+</tr>
+<tr>
+<td>@</td>
+<td>[</td>
+<td>`</td>
+<td>{</td>
+<td>KC_LBRC</td>
+</tr>
+<tr>
+<td>[</td>
+<td>]</td>
+<td>{</td>
+<td>}</td>
+<td>KC_RBRC</td>
+</tr>
+<tr>
+<td>;</td>
+<td>;</td>
+<td>+</td>
+<td>:</td>
+<td>KC_SCLN</td>
+</tr>
+<tr>
+<td>:</td>
+<td>'</td>
+<td>*</td>
+<td>&quot;</td>
+<td>KC_QUOT</td>
+</tr>
+<tr>
+<td>]</td>
+<td>\</td>
+<td>}</td>
+<td>｜</td>
+<td>KC_BSLS</td>
+</tr>
+<tr>
+<td>,</td>
+<td>,</td>
+<td>&lt;</td>
+<td>&lt;</td>
+<td>KC_COMM</td>
+</tr>
+<tr>
+<td>.</td>
+<td>.</td>
+<td>&gt;</td>
+<td>&gt;</td>
+<td>KC_DOT</td>
+</tr>
+<tr>
+<td>/</td>
+<td>/</td>
+<td>?</td>
+<td>?</td>
+<td>KC_SLSH</td>
+</tr>
+<tr>
+<td>\</td>
+<td>無</td>
+<td>_</td>
+<td>無</td>
+<td>KC_RO</td>
+</tr>
+</tbody>
+</table>
+<p>要するに上記の差分表を意識して、自分の意図するキーバインドを設定してあげると良い。
+ErgoDoxの場合はUSキーボード前提なので、言葉の意味合いがJISキーボードの場合だと変わってしまうと言うだけである。
+自分はGUIサイトでこの差分表を見ながらJISに合わせて設定をした。結構めんどくさかったが、一度やってしまえば二度とやる作業ではないのでまあ頑張るしかない。</p>
+<h2 id="まとめ">まとめ</h2>
+<p>JISキーボード対応以外にもファームウェアのRESETボタンを事前にキーバインドに設定しておいたり、
+Layer間移動の設定や、英語と日本語の変換などと細かい設定が必要だが、それぞれ自分の好きなところにキーを設定できるのはとてもありがたい。
+割と何度もファームウェアの流し込みを繰り返しながら、自分に合うキーバインドを探すことになるがこれは結構楽しかった。</p>
+<p>おかげで生産性は上がった気がするので、キーボードはプログラマーにとってやっぱり大事な道具の一つだよなと改めて思う。</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+      
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        191 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2019-04-14 01:50
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+    <div class="pagination">
+        <div class="pagination__title">
+            <span class="pagination__title-h">Read other posts</span>
+            <hr />
+        </div>
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">MLIR: 新しいTFコンパイラインフラとなる中間表現について</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://sott0n.github.io/posts/2019/03/onnx%E3%81%AEdoc%E3%82%92%E8%AA%AD%E3%82%80-onnx-versioning/">
+                    <span class="button__text">ONNXのdocを読む: ONNX versioning</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://sott0n.github.io/bundle.min.599099f1f14b78b657d524b28e10e0c5098e7cd46e9c7aed73d577068a276c3ff1bb234cbf29cb313333e83cf411727b43157c91ce5b809e2ffc81664614608e.js" integrity="sha512-WZCZ8fFLeLZX1SSyjhDgxQmOfNRunHrtc9V3BoonbD/xuyNMvynLMTMz6Dz0EXJ7QxV8kc5bgJ4v/IFmRhRgjg=="></script>
+
+
+
+    </body>
+</html>

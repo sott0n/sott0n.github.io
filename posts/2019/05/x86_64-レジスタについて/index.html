@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
+レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
+ 汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。
+   レジスタ名 内容     rax 汎用レジスタ   rbx 汎用レジスタ   rcx 汎用レジスタ   rdx 汎用レジスタ   rsi 汎用レジスタ   rdi 汎用レジスタ   rbp 汎用レジスタ   rsp 汎用レジスタ兼スタックポインタ   r8 汎用レジスタ   r9 汎用レジスタ   r10 汎用レジスタ   r11 汎用レジスタ   r12 汎用レジスタ   r13 汎用レジスタ   r14 汎用レジスタ   r15 汎用レジスタ   rip プログラムカウンタ   eflags フラグレジスタ   cs セグメントレジスタ   ss セグメントレジスタ   ds セグメントレジスタ   es セグメントレジスタ   fs セグメントレジスタ   gs セグメントレジスタ    このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。" />
+<meta name="keywords" content=", x86_64" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/" />
+
+
+    <title>
+        
+            x86_64: レジスタについて :: SE Can&#39;t Code  — This is a Software Engineer, not System Engineer.
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="https://sott0n.github.io/main.c46cbca46fa76c0fcd3da8313ecf4adee5fb3ffb0288c0902d7e90aead220d79.css">
+
+
+
+
+
+
+<meta itemprop="name" content="x86_64: レジスタについて">
+<meta itemprop="description" content="CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
+レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
+ 汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。
+   レジスタ名 内容     rax 汎用レジスタ   rbx 汎用レジスタ   rcx 汎用レジスタ   rdx 汎用レジスタ   rsi 汎用レジスタ   rdi 汎用レジスタ   rbp 汎用レジスタ   rsp 汎用レジスタ兼スタックポインタ   r8 汎用レジスタ   r9 汎用レジスタ   r10 汎用レジスタ   r11 汎用レジスタ   r12 汎用レジスタ   r13 汎用レジスタ   r14 汎用レジスタ   r15 汎用レジスタ   rip プログラムカウンタ   eflags フラグレジスタ   cs セグメントレジスタ   ss セグメントレジスタ   ds セグメントレジスタ   es セグメントレジスタ   fs セグメントレジスタ   gs セグメントレジスタ    このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。"><meta itemprop="datePublished" content="2019-05-01T22:06:41&#43;09:00" />
+<meta itemprop="dateModified" content="2019-05-01T22:06:41&#43;09:00" />
+<meta itemprop="wordCount" content="298"><meta itemprop="image" content="https://sott0n.github.io/"/>
+<meta itemprop="keywords" content="x86_64," />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://sott0n.github.io/"/>
+
+<meta name="twitter:title" content="x86_64: レジスタについて"/>
+<meta name="twitter:description" content="CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
+レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
+ 汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。
+   レジスタ名 内容     rax 汎用レジスタ   rbx 汎用レジスタ   rcx 汎用レジスタ   rdx 汎用レジスタ   rsi 汎用レジスタ   rdi 汎用レジスタ   rbp 汎用レジスタ   rsp 汎用レジスタ兼スタックポインタ   r8 汎用レジスタ   r9 汎用レジスタ   r10 汎用レジスタ   r11 汎用レジスタ   r12 汎用レジスタ   r13 汎用レジスタ   r14 汎用レジスタ   r15 汎用レジスタ   rip プログラムカウンタ   eflags フラグレジスタ   cs セグメントレジスタ   ss セグメントレジスタ   ds セグメントレジスタ   es セグメントレジスタ   fs セグメントレジスタ   gs セグメントレジスタ    このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。"/>
+
+
+
+
+    <meta property="og:title" content="x86_64: レジスタについて" />
+<meta property="og:description" content="CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
+レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
+ 汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。
+   レジスタ名 内容     rax 汎用レジスタ   rbx 汎用レジスタ   rcx 汎用レジスタ   rdx 汎用レジスタ   rsi 汎用レジスタ   rdi 汎用レジスタ   rbp 汎用レジスタ   rsp 汎用レジスタ兼スタックポインタ   r8 汎用レジスタ   r9 汎用レジスタ   r10 汎用レジスタ   r11 汎用レジスタ   r12 汎用レジスタ   r13 汎用レジスタ   r14 汎用レジスタ   r15 汎用レジスタ   rip プログラムカウンタ   eflags フラグレジスタ   cs セグメントレジスタ   ss セグメントレジスタ   ds セグメントレジスタ   es セグメントレジスタ   fs セグメントレジスタ   gs セグメントレジスタ    このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/" /><meta property="og:image" content="https://sott0n.github.io/"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-05-01T22:06:41&#43;09:00" />
+<meta property="article:modified_time" content="2019-05-01T22:06:41&#43;09:00" /><meta property="og:site_name" content="SE Can&#39;t Code" />
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2019-05-01 22:06:41 &#43;0900 JST" />
+
+
+
+
+
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://sott0n.github.io/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">SE Can&#39;t Code</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://sott0n.github.io/about">About</a></li><li><a href="https://sott0n.github.io/posts">Blog</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        2 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/">x86_64: レジスタについて</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。</p>
+<h2 id="レジスタの種類">レジスタの種類</h2>
+<p>一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。</p>
+<ul>
+<li>汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。</li>
+<li>プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。</li>
+<li>フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。</li>
+<li>浮動小数レジスタ: 浮動小数演算のデータを保持する。</li>
+</ul>
+<p>x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。</p>
+<table>
+<thead>
+<tr>
+<th>レジスタ名</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rax</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rbx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rcx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rdx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rsi</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rdi</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rbp</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rsp</td>
+<td>汎用レジスタ兼スタックポインタ</td>
+</tr>
+<tr>
+<td>r8</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r9</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r10</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r11</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r12</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r13</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r14</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r15</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rip</td>
+<td>プログラムカウンタ</td>
+</tr>
+<tr>
+<td>eflags</td>
+<td>フラグレジスタ</td>
+</tr>
+<tr>
+<td>cs</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>ss</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>ds</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>es</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>fs</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>gs</td>
+<td>セグメントレジスタ</td>
+</tr>
+</tbody>
+</table>
+<p>このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。</p>
+<p>レジスタは容量がこのように小さい分、CPU内部に存在するためにコンピュータの中でも最も高速にアクセスできる場所にある。次にキャッシュメモリやメインメモリがあるが、レジスタと比べるとアクセス速度は遅くなる。ので、レジスタはコンピュータにとって命令実行の際に最も高速に動かせる場所であり、メモリへのアドレスを保存していたりとプログラム実行のための中核となる機能と言える。</p>
+<h2 id="アセンブリ言語">アセンブリ言語</h2>
+<p>簡単なプログラムを作成し、x86_64でどのようにプログラムが動くのかをデバッグして挙動を確認する。</p>
+<pre><code>	.globl	main
+main:
+	mov $1, %rax
+	mov $2, %r8
+	add %r8, %rax
+	ret
+</code></pre><p>このプログラムはとても単純だ。命令の1行目だと1という即値をraxレジスタに保存しているだけだ(即値を表現する時は$を数値の前に付ける)。これはアセンブリ言語で、このプログラムをgccでコンパイルしてgdbでデバッグしながらどのようにプログラムが実行していくのかを見ていくのだが、まずはこのプログラムの記法について触れる。</p>
+<p>アセンブリ言語ではCPUによって記法が変わる。基本的にはAT&amp;T記法とIntel記法で分かれるのだが、一般的なCPUで採用されているIntel記法とは違って、x86_64のLinuxではAT&amp;T記法を採用している。</p>
+<pre><code># Intel記法
+instruction operand0, operand1
+
+# AT&amp;T記法
+instruction operand1, operand0
+</code></pre><p>これは結構混乱してしまうところなのだが、二つの記法でoperandの順序が逆転している。instructionはmovやaddといった命令を指すもので、これはニーモニックと一般的に呼ばれている。その次に続くのはオペランドで、たとえばAレジスタの値をBレジスタに書き換える、といった命令があった場合のAレジスタやBレジスタがオペランドとして表現される。</p>
+<p>さて、上記のプログラムに立ち戻ると、このプログラムは「即値1を保存したraxレジスタに対して、即値2をr8レジスタに保存したものを加算する」という命令になるので、1+2=3という単純な命令を表現している。mainというのはラベルと呼ばれ、main関数内の実行内容という捉え方で問題ない。retはreturnで、スタックで呼び出されていく命令に対して呼び出し元のアドレスに戻ることを意味する。</p>
+<h2 id="gdbでデバッグしてみる">gdbでデバッグしてみる</h2>
+<p>プログラムの動きを見ていくためにgdbでデバッグしていこう。上に書いたプログラムをgccでコンパイルしたあとでgdbを実行してプログラムの動きを見ていく。</p>
+<pre><code>$ gcc sample.s
+$ gdb a.out
+</code></pre><p>アセンブリをコンパイルするとa.outのファイルが生成されるので、gdbでa.outファイルを指定して実行する。すると対話的にgdbが起動してコマンドを一つ一つ打っていくことでプログラムの動きを一つ一つ追っていくことができる。いわゆるデバッグするということだ。</p>
+<p>gdbの基本コマンドをここにまとめる。</p>
+<ul>
+<li>start: プログラムを開始してmain関数の先頭で処理を止める</li>
+<li>info registers: 各レジスタの値を表示</li>
+<li>disassemble: 現在実行中の関数に含まれる命令を表示</li>
+<li>stepi: 一命令実行する</li>
+<li>print: コマンドに与えた式の値を表示する</li>
+<li>quit: gdb を終了</li>
+</ul>
+<p>gdbは対話的なデバッガーなのでコマンドを打ちながら命令を実行していき、情報を見ていく。info registersを叩くと各レジスタに保存されているデータやアドレスが表示されるため、命令を実行していく中でこの値が変わることを確認する。まずはstartでa.outのデバッグを開始する。</p>
+<pre><code>(gdb) start
+Temporary breakpoint 1 at 0x5fa
+Starting program: /home/a.out
+
+Temporary breakpoint 1, 0x00005555555545fa in main ()
+(gdb) info registers
+rax            0x5555555545fa   93824992232954
+rbx            0x0      0
+rcx            0x555555554610   93824992232976
+rdx            0x7fffffffe798   140737488349080
+rsi            0x7fffffffe788   140737488349064
+rdi            0x1      1
+rbp            0x555555554610   0x555555554610 &lt;__libc_csu_init&gt;
+rsp            0x7fffffffe6a8   0x7fffffffe6a8
+r8             0x7ffff7dd0d80   140737351847296
+r9             0x7ffff7dd0d80   140737351847296
+r10            0x0      0
+r11            0x0      0
+r12            0x5555555544f0   93824992232688
+r13            0x7fffffffe780   140737488349056
+r14            0x0      0
+r15            0x0      0
+rip            0x5555555545fa   0x5555555545fa &lt;main&gt;
+eflags         0x246    [ PF ZF IF ]
+cs             0x33     51
+ss             0x2b     43
+ds             0x0      0
+es             0x0      0
+fs             0x0      0
+gs             0x0      0
+</code></pre><p>このようにinfo registersで各レジスタの値を確認することができる。次に読み込んだプログラムをstepiで一つ一つ命令を進めていく。</p>
+<pre><code>(gdb) stepi
+0x0000555555554601 in main ()
+(gdb) stepi
+0x0000555555554608 in main ()
+(gdb) print $rax
+$1 = 1
+(gdb) print $r8
+$2 = 2
+</code></pre><p>printでレジスタの値を確認すると、raxには即値1が、r8には即値2が保存されており、mov命令が実行されたことがわかる。ここでdisassembleコマンドを打ってみる。</p>
+<pre><code>(gdb) disassemble
+Dump of assembler code for function main:
+   0x00005555555545fa &lt;+0&gt;:     mov    $0x1,%rax
+   0x0000555555554601 &lt;+7&gt;:     mov    $0x2,%r8
+=&gt; 0x0000555555554608 &lt;+14&gt;:    add    %r8,%rax
+   0x000055555555460b &lt;+17&gt;:    retq
+   0x000055555555460c &lt;+18&gt;:    nopl   0x0(%rax)
+End of assembler dump.
+</code></pre><p>disassembleコマンドは現在デバッガによって停止されている命令の位置を矢印で示している。つまり、二つのmovが実行されたところで止まっている。ここで命令を進めてadd命令を行う。</p>
+<pre><code>(gdb) stepi
+0x000055555555460b in main ()
+(gdb) print $rax
+$3 = 3
+(gdb) print $r8
+$4 = 2
+</code></pre><p>printで確認してみると、raxの値が1+2=3となり、正しく即値が加算されていることがわかる。</p>
+<p>このようにニーモニックの命令を一つ一つ実行していき、レジスタの値を操作することで機械語というものは構成される。世の中には多くのプログラミング言語が存在するが、コンパイラによってコンパイルされるとCPUが理解できるこのような機械語に変換され(これはアセンブリだけど)、レジスタにある値やアドレスを操作しながら演算していくのが基本的なコンピュータの動きとなる。</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://sott0n.github.io/tags/x86_64/">x86_64</a></span>
+        
+    </p>
+
+      
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        298 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2019-05-01 22:06
+        
+
+         
+          
+        
+      </p>
+    </div>
+
+    
+    <div class="pagination">
+        <div class="pagination__title">
+            <span class="pagination__title-h">Read other posts</span>
+            <hr />
+        </div>
+
+        <div class="pagination__buttons">
+            
+
+            
+            <span class="button next">
+                <a href="https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/">
+                    <span class="button__text">MLIR: 新しいTFコンパイラインフラとなる中間表現について</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://sott0n.github.io/bundle.min.599099f1f14b78b657d524b28e10e0c5098e7cd46e9c7aed73d577068a276c3ff1bb234cbf29cb313333e83cf411727b43157c91ce5b809e2ffc81664614608e.js" integrity="sha512-WZCZ8fFLeLZX1SSyjhDgxQmOfNRunHrtc9V3BoonbD/xuyNMvynLMTMz6Dz0EXJ7QxV8kc5bgJ4v/IFmRhRgjg=="></script>
+
+
+
+    </body>
+</html>

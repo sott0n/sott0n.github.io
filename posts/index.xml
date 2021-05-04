@@ -1,31 +1,241 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Post on SE Can&#39;t Code</title>
-    <link>https://sott0n.github.io/post/</link>
-    <description>Recent content in Post on SE Can&#39;t Code</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>ja</language>
-    <lastBuildDate>Wed, 01 May 2019 22:06:41 +0900</lastBuildDate><atom:link href="https://sott0n.github.io/post/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>x86_64: レジスタについて</title>
-      <link>https://sott0n.github.io/post/x86_64_basic/</link>
-      <pubDate>Wed, 01 May 2019 22:06:41 +0900</pubDate>
-      
-      <guid>https://sott0n.github.io/post/x86_64_basic/</guid>
-      <description>CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
+    <channel>
+        <title>Posts on SE Can&#39;t Code</title>
+        <link>https://sott0n.github.io/posts/</link>
+        <description>Recent content in Posts on SE Can&#39;t Code</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>ja</language>
+        <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+        <lastBuildDate>Wed, 01 May 2019 22:06:41 +0900</lastBuildDate>
+        <atom:link href="https://sott0n.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>x86_64: レジスタについて</title>
+            <link>https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</link>
+            <pubDate>Wed, 01 May 2019 22:06:41 +0900</pubDate>
+            
+            <guid>https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</guid>
+            <description>CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。
 レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
  汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。
    レジスタ名 内容     rax 汎用レジスタ   rbx 汎用レジスタ   rcx 汎用レジスタ   rdx 汎用レジスタ   rsi 汎用レジスタ   rdi 汎用レジスタ   rbp 汎用レジスタ   rsp 汎用レジスタ兼スタックポインタ   r8 汎用レジスタ   r9 汎用レジスタ   r10 汎用レジスタ   r11 汎用レジスタ   r12 汎用レジスタ   r13 汎用レジスタ   r14 汎用レジスタ   r15 汎用レジスタ   rip プログラムカウンタ   eflags フラグレジスタ   cs セグメントレジスタ   ss セグメントレジスタ   ds セグメントレジスタ   es セグメントレジスタ   fs セグメントレジスタ   gs セグメントレジスタ    このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。</description>
-    </item>
-    
-    <item>
-      <title>MLIR: 新しいTFコンパイラインフラとなる中間表現について</title>
-      <link>https://sott0n.github.io/post/mlir/</link>
-      <pubDate>Fri, 19 Apr 2019 07:50:26 +0900</pubDate>
-      
-      <guid>https://sott0n.github.io/post/mlir/</guid>
-      <description>2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
+            <content type="html"><![CDATA[<p>CPUにはデータや実行している命令のアドレスを保存するためのレジスタという少量のメモリ領域がある。コンピュータで演算を行う際にはレジスタ上に保存されているデータやアドレスを元にして実行を行うようになっており、コンピュータ上ではもっともアクセス速度が速いデータ保存領域と言える。ここではx86_64に対してgdbを動かしながらレジスタについてまとめていこうと思う。</p>
+<h2 id="レジスタの種類">レジスタの種類</h2>
+<p>一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。</p>
+<ul>
+<li>汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。</li>
+<li>プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。</li>
+<li>フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。</li>
+<li>浮動小数レジスタ: 浮動小数演算のデータを保持する。</li>
+</ul>
+<p>x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。</p>
+<table>
+<thead>
+<tr>
+<th>レジスタ名</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rax</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rbx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rcx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rdx</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rsi</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rdi</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rbp</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rsp</td>
+<td>汎用レジスタ兼スタックポインタ</td>
+</tr>
+<tr>
+<td>r8</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r9</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r10</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r11</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r12</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r13</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r14</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>r15</td>
+<td>汎用レジスタ</td>
+</tr>
+<tr>
+<td>rip</td>
+<td>プログラムカウンタ</td>
+</tr>
+<tr>
+<td>eflags</td>
+<td>フラグレジスタ</td>
+</tr>
+<tr>
+<td>cs</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>ss</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>ds</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>es</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>fs</td>
+<td>セグメントレジスタ</td>
+</tr>
+<tr>
+<td>gs</td>
+<td>セグメントレジスタ</td>
+</tr>
+</tbody>
+</table>
+<p>このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。</p>
+<p>レジスタは容量がこのように小さい分、CPU内部に存在するためにコンピュータの中でも最も高速にアクセスできる場所にある。次にキャッシュメモリやメインメモリがあるが、レジスタと比べるとアクセス速度は遅くなる。ので、レジスタはコンピュータにとって命令実行の際に最も高速に動かせる場所であり、メモリへのアドレスを保存していたりとプログラム実行のための中核となる機能と言える。</p>
+<h2 id="アセンブリ言語">アセンブリ言語</h2>
+<p>簡単なプログラムを作成し、x86_64でどのようにプログラムが動くのかをデバッグして挙動を確認する。</p>
+<pre><code>	.globl	main
+main:
+	mov $1, %rax
+	mov $2, %r8
+	add %r8, %rax
+	ret
+</code></pre><p>このプログラムはとても単純だ。命令の1行目だと1という即値をraxレジスタに保存しているだけだ(即値を表現する時は$を数値の前に付ける)。これはアセンブリ言語で、このプログラムをgccでコンパイルしてgdbでデバッグしながらどのようにプログラムが実行していくのかを見ていくのだが、まずはこのプログラムの記法について触れる。</p>
+<p>アセンブリ言語ではCPUによって記法が変わる。基本的にはAT&amp;T記法とIntel記法で分かれるのだが、一般的なCPUで採用されているIntel記法とは違って、x86_64のLinuxではAT&amp;T記法を採用している。</p>
+<pre><code># Intel記法
+instruction operand0, operand1
+
+# AT&amp;T記法
+instruction operand1, operand0
+</code></pre><p>これは結構混乱してしまうところなのだが、二つの記法でoperandの順序が逆転している。instructionはmovやaddといった命令を指すもので、これはニーモニックと一般的に呼ばれている。その次に続くのはオペランドで、たとえばAレジスタの値をBレジスタに書き換える、といった命令があった場合のAレジスタやBレジスタがオペランドとして表現される。</p>
+<p>さて、上記のプログラムに立ち戻ると、このプログラムは「即値1を保存したraxレジスタに対して、即値2をr8レジスタに保存したものを加算する」という命令になるので、1+2=3という単純な命令を表現している。mainというのはラベルと呼ばれ、main関数内の実行内容という捉え方で問題ない。retはreturnで、スタックで呼び出されていく命令に対して呼び出し元のアドレスに戻ることを意味する。</p>
+<h2 id="gdbでデバッグしてみる">gdbでデバッグしてみる</h2>
+<p>プログラムの動きを見ていくためにgdbでデバッグしていこう。上に書いたプログラムをgccでコンパイルしたあとでgdbを実行してプログラムの動きを見ていく。</p>
+<pre><code>$ gcc sample.s
+$ gdb a.out
+</code></pre><p>アセンブリをコンパイルするとa.outのファイルが生成されるので、gdbでa.outファイルを指定して実行する。すると対話的にgdbが起動してコマンドを一つ一つ打っていくことでプログラムの動きを一つ一つ追っていくことができる。いわゆるデバッグするということだ。</p>
+<p>gdbの基本コマンドをここにまとめる。</p>
+<ul>
+<li>start: プログラムを開始してmain関数の先頭で処理を止める</li>
+<li>info registers: 各レジスタの値を表示</li>
+<li>disassemble: 現在実行中の関数に含まれる命令を表示</li>
+<li>stepi: 一命令実行する</li>
+<li>print: コマンドに与えた式の値を表示する</li>
+<li>quit: gdb を終了</li>
+</ul>
+<p>gdbは対話的なデバッガーなのでコマンドを打ちながら命令を実行していき、情報を見ていく。info registersを叩くと各レジスタに保存されているデータやアドレスが表示されるため、命令を実行していく中でこの値が変わることを確認する。まずはstartでa.outのデバッグを開始する。</p>
+<pre><code>(gdb) start
+Temporary breakpoint 1 at 0x5fa
+Starting program: /home/a.out
+
+Temporary breakpoint 1, 0x00005555555545fa in main ()
+(gdb) info registers
+rax            0x5555555545fa   93824992232954
+rbx            0x0      0
+rcx            0x555555554610   93824992232976
+rdx            0x7fffffffe798   140737488349080
+rsi            0x7fffffffe788   140737488349064
+rdi            0x1      1
+rbp            0x555555554610   0x555555554610 &lt;__libc_csu_init&gt;
+rsp            0x7fffffffe6a8   0x7fffffffe6a8
+r8             0x7ffff7dd0d80   140737351847296
+r9             0x7ffff7dd0d80   140737351847296
+r10            0x0      0
+r11            0x0      0
+r12            0x5555555544f0   93824992232688
+r13            0x7fffffffe780   140737488349056
+r14            0x0      0
+r15            0x0      0
+rip            0x5555555545fa   0x5555555545fa &lt;main&gt;
+eflags         0x246    [ PF ZF IF ]
+cs             0x33     51
+ss             0x2b     43
+ds             0x0      0
+es             0x0      0
+fs             0x0      0
+gs             0x0      0
+</code></pre><p>このようにinfo registersで各レジスタの値を確認することができる。次に読み込んだプログラムをstepiで一つ一つ命令を進めていく。</p>
+<pre><code>(gdb) stepi
+0x0000555555554601 in main ()
+(gdb) stepi
+0x0000555555554608 in main ()
+(gdb) print $rax
+$1 = 1
+(gdb) print $r8
+$2 = 2
+</code></pre><p>printでレジスタの値を確認すると、raxには即値1が、r8には即値2が保存されており、mov命令が実行されたことがわかる。ここでdisassembleコマンドを打ってみる。</p>
+<pre><code>(gdb) disassemble
+Dump of assembler code for function main:
+   0x00005555555545fa &lt;+0&gt;:     mov    $0x1,%rax
+   0x0000555555554601 &lt;+7&gt;:     mov    $0x2,%r8
+=&gt; 0x0000555555554608 &lt;+14&gt;:    add    %r8,%rax
+   0x000055555555460b &lt;+17&gt;:    retq
+   0x000055555555460c &lt;+18&gt;:    nopl   0x0(%rax)
+End of assembler dump.
+</code></pre><p>disassembleコマンドは現在デバッガによって停止されている命令の位置を矢印で示している。つまり、二つのmovが実行されたところで止まっている。ここで命令を進めてadd命令を行う。</p>
+<pre><code>(gdb) stepi
+0x000055555555460b in main ()
+(gdb) print $rax
+$3 = 3
+(gdb) print $r8
+$4 = 2
+</code></pre><p>printで確認してみると、raxの値が1+2=3となり、正しく即値が加算されていることがわかる。</p>
+<p>このようにニーモニックの命令を一つ一つ実行していき、レジスタの値を操作することで機械語というものは構成される。世の中には多くのプログラミング言語が存在するが、コンパイラによってコンパイルされるとCPUが理解できるこのような機械語に変換され(これはアセンブリだけど)、レジスタにある値やアドレスを操作しながら演算していくのが基本的なコンピュータの動きとなる。</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>MLIR: 新しいTFコンパイラインフラとなる中間表現について</title>
+            <link>https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</link>
+            <pubDate>Fri, 19 Apr 2019 07:50:26 +0900</pubDate>
+            
+            <guid>https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/</guid>
+            <description>2019 European LLVM Developers Meetingを眺めていたらGoogleがMulti-Level Intermediate Representation for Compiler Infrastructureと言う 新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。 いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。
 tl;dr MLIR(Multi-Level Intermediate Representation)を一言で表すと:
  TensorFlowの新しいSSAベースの中間表現 複雑化しているTensorFlowのコンパイラ郡を統一する目的がある LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている  位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。 これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。
 複雑化したTFコンパイラ TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、 これらは開発が進むと共に複雑化していった。
@@ -36,15 +246,72 @@ MLIRとは MLIRはこれらの問題を解決する新しい中間表現とし�
 先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、 これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。 MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。
 MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
  TensorFlow IR, which represents all things possible in TensorFlow graphs XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs) An experimental affine dialect, which focuses on polyhedral representations and optimizations LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM TensorFlow Lite, which will translate to running code on mobile platforms  Dialectsはカスタム型を定義することができる。 これにより将来的にどのDialectsであれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。</description>
-    </item>
-    
-    <item>
-      <title>ErgoDoxEZキーボードを導入する</title>
-      <link>https://sott0n.github.io/post/ergodox/</link>
-      <pubDate>Sun, 14 Apr 2019 01:50:17 +0900</pubDate>
-      
-      <guid>https://sott0n.github.io/post/ergodox/</guid>
-      <description>分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
+            <content type="html"><![CDATA[<p><code>2019 European LLVM Developers Meeting</code>を眺めていたらGoogleが<code>Multi-Level Intermediate Representation for Compiler Infrastructure</code>と言う
+新しい中間表現の発表をしていたので気になって調べてみた。どうも複雑怪奇になっているTensorFlowのコンパイラエコシステムを一つにまとめる新しいインフラとしての中間表現っぽい。
+いくつかの関連する資料を読んだのでそれぞれポイントを抜粋しようと思う。</p>
+<h2 id="tldr">tl;dr</h2>
+<p>MLIR(Multi-Level Intermediate Representation)を一言で表すと:</p>
+<ul>
+<li>TensorFlowの新しいSSAベースの中間表現</li>
+<li>複雑化しているTensorFlowのコンパイラ郡を統一する目的がある</li>
+<li>LLVMのデザインに強く影響を受けており、柔軟なインフラ設計となっている</li>
+</ul>
+<p>位置付けとしては、一つ上位レイヤを追加して共通フォーマット的なメタ表現を設計したというイメージ。
+これによって各アーキテクチャ毎に独自のIRを生成する必要がなくなって、開発者にとってはMLIRを意識すれば柔軟に開発が行えるというものだと思う。</p>
+<h2 id="複雑化したtfコンパイラ">複雑化したTFコンパイラ</h2>
+<p>TensorFlowにはいくつかのコンパイラが存在する。それぞれCPU/GPU/TPU、モバイルといったターゲットとなるアーキテクチャ毎にコンパイラ(XLA/TensorRT/nGraph/CoreML/TensorFlow Lite etc)が存在し、
+これらは開発が進むと共に複雑化していった。</p>
+<p><img src="/image/mlir_image.png" alt="image" title="ref: https://medium.com/tensorflow/mlir-a-new-intermediate-representation-and-compiler-framework-beba999ed18d"></p>
+<p>たとえば、TensorFlow XLAの場合だと HLOと言う中間表現に変換してグラフ最適化などを実行した上で、LLVM IRに変換してCPUやGPU向けにコードジェネレーションを行ったり、
+TPU IRに変換してTPU用に最適化をかけたりする。Tensor RTはNVIDIAが出しているコンパイラだが、NVIDIAのGPUアーキテクチャをターゲットにする場合はこれを利用するとNVIDIA特化の最適化が行われる。
+モバイル上でDeep Learningを動かしたい場合はTensorFlow Liteを利用するだろう。</p>
+<p>このような複雑怪奇な状態は開発者をとても困惑させる。と言うのも、それぞれのコンパイラではそれぞれの中間表現を設計しており、それらはとても似ているが決して同じものではないので、
+複数のアーキテクチャをターゲットにした場合は一つ一つ最適化を掛け直し、path変換を行わなければならない。また、それぞれでエラーメッセージの設計も違うので、開発者をとても困惑させるだろう。</p>
+<h2 id="mlirとは">MLIRとは</h2>
+<p>MLIRはこれらの問題を解決する新しい中間表現として設計されている。最新の最適化コンパイラのための柔軟なインフラで、また、LLVMのデザインに強く影響を受けている。
+たとえば以下のようなところはLLVMと似たデザインとなっている:</p>
+<ul>
+<li>SSAベースな中間表現</li>
+<li>柔軟な型システム</li>
+<li>tree address</li>
+<li>構造が同じ(Module/Function/Block/Instruction)</li>
+<li>同じ単位の中で複数レベルの抽象化を組み合わせたグラフの表現/分析/変換が可能</li>
+</ul>
+<p>また、これらの抽象概念には、TensorFlow操作、入れ子になった多面体ループ領域、さらにはLLVM命令、さらには固定ハードウェア操作とタイプが含まれる。</p>
+<p>先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、
+これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。
+MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。</p>
+<h2 id="mlir-dialects">MLIR Dialects</h2>
+<p>MLIRは下記をターゲットとしてサポートしている:</p>
+<ul>
+<li>TensorFlow IR, which represents all things possible in TensorFlow graphs</li>
+<li>XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs)</li>
+<li>An experimental affine dialect, which focuses on polyhedral representations and optimizations</li>
+<li>LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM</li>
+<li>TensorFlow Lite, which will translate to running code on mobile platforms</li>
+</ul>
+<p><code>Dialects</code>はカスタム型を定義することができる。
+これにより将来的にどの<code>Dialects</code>であれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。</p>
+<p>新しい低レベルコンパイラを接続したい場合は、新しい<code>Dialects</code>とTensorFlow Graph dialectsと自身の<code>Dialects</code>の間の下位部分を作成する。
+これにより同じモデルの異なるレベルで<code>Dialects</code>をターゲットにすることさえできる。
+また、MLIRはあらゆるレベルでの変換を構成することを可能にし、IRで自分自身の操作と抽象化を定義することができる。</p>
+<hr>
+<h3 id="reference">Reference</h3>
+<ul>
+<li><a href="https://github.com/tensorflow/mlir">MLIR</a></li>
+<li><a href="https://drive.google.com/file/d/1hUeAJXcAXwz82RXA5VtO5ZoH8cVQhrOK/view">MLIR Primer:A Compiler Infrastructure for the End of Moore’s Law</a></li>
+<li><a href="https://medium.com/tensorflow/mlir-a-new-intermediate-representation-and-compiler-framework-beba999ed18d">MLIR: A new intermediate representation and compiler framework</a></li>
+</ul>
+]]></content>
+        </item>
+        
+        <item>
+            <title>ErgoDoxEZキーボードを導入する</title>
+            <link>https://sott0n.github.io/posts/2019/04/ergodoxez%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89%E3%82%92%E5%B0%8E%E5%85%A5%E3%81%99%E3%82%8B/</link>
+            <pubDate>Sun, 14 Apr 2019 01:50:17 +0900</pubDate>
+            
+            <guid>https://sott0n.github.io/posts/2019/04/ergodoxez%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89%E3%82%92%E5%B0%8E%E5%85%A5%E3%81%99%E3%82%8B/</guid>
+            <description>分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。 画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。
 tl;dr ErgoDox EZの感想を述べると、
  ErgoDox EZの設定自体はそんなに難しくない ただしJISキーボードを想定する場合は結構辛い 自分好みにキーバインドが設定できるのでかなり楽しい  慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。
 ErgoDox EZとは ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。
@@ -63,15 +330,246 @@ brew tap osx-cross/avr brew install avr-libc brew install dfu-programmer その�
 https://configure.ergodox-ez.com/layouts/default/latest/0
 このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、Print layoutから印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。
 JISキーボード設定 さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。 書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。 たとえば、JISの場合の@はUSの場合だと[と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。</description>
-    </item>
-    
-    <item>
-      <title>ONNXのdocを読む: ONNX versioning</title>
-      <link>https://sott0n.github.io/post/onnx_reading_versioning/</link>
-      <pubDate>Wed, 06 Mar 2019 09:44:12 +0900</pubDate>
-      
-      <guid>https://sott0n.github.io/post/onnx_reading_versioning/</guid>
-      <description>ONNXのドキュメントをちゃんと読もうということで読んだところからメモとしていろいろまとめていこうと思う（今更だけど）。今回はONNX利用者がまず意識しないといけないversioningのドキュメントを読む。
+            <content type="html"><![CDATA[<p><img src="/image/ergodox_ez.jpg" alt="image"></p>
+<p>分割エルゴノミクスキーボードで有名なErgoDox EZを導入したのでその設定方法についてメモを残そうと思う。
+画像のものは自宅だが、自分はこのキーボードを職場用として使っている。端的に言うと、ErgoDoxサイコーなのでプログラマーはぜひ導入しましょう。</p>
+<h2 id="tldr">tl;dr</h2>
+<p>ErgoDox EZの感想を述べると、</p>
+<ul>
+<li>ErgoDox EZの設定自体はそんなに難しくない</li>
+<li>ただしJISキーボードを想定する場合は結構辛い</li>
+<li>自分好みにキーバインドが設定できるのでかなり楽しい</li>
+</ul>
+<p>慣れるまで大変だけれど、3日もすれば余裕で慣れるし、そのあとはプログラミングがかなり楽になるのでオススメ。</p>
+<h2 id="ergodox-ezとは">ErgoDox EZとは</h2>
+<p>ErgoDoxはキーボードの設計とソースコードをオープンにしているプロジェクトで、ErgoDox EZはそれを製品として販売しているものになる。</p>
+<p><a href="https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/">https://www.indiegogo.com/projects/ergodox-ez-an-incredible-mechanical-keyboard#/</a></p>
+<p>自由にキーバインドをカスタマイズできたり、キー自体を色々自分で変えて遊んでみたりとプログラマーがオリジナルで自分のキーボードを作れて楽しめるような製品になっている。
+購入すると海の向こう側から配送してもらうことになるのだが、1~2週間程度で日本の自宅までやってきた記憶がある。</p>
+<h2 id="キーバインド条件">キーバインド条件</h2>
+<p>ErgoDox EZが手元に届いたらまずやることはキーバインドの設定だろう。本エントリではこのキーバインドの設定についてのみメモを残していく。</p>
+<p>自分の場合は下記の条件でキーバインドを設定した:</p>
+<ul>
+<li>WindowsとMacbookの両方で利用できること</li>
+<li>JISキーボードであること</li>
+</ul>
+<p>自分がなぜ日本人なのだろうかと思うタイミングの一つにJISキーボード縛りがあると思う。
+自分の場合、会社の特殊な環境のおかげでUSキーボードが何故か機能しないという現象に合い、仕方なくJISキーボードで設定をする羽目になった。
+当然ながらこの手の海外産の製品はUSキーボードが前提になってしまうため、キーバインドも微妙な違いが出てくる。</p>
+<p>また、職場がWindowsとMacbookの両方で作業しているので、両方で使えるようにキーバインドするのが結構大変だった。
+ErgoDox EZはキーバインド自体をLayerとして複数持つことができ、かつそれらを自由に追加できるので、
+Windows用のキーバインドとMacbook用のキーバインドを用意してあげたりもできる。自分は最終的にLayerを一つ追加してOS毎に対応するようにした。</p>
+<h2 id="キーバインドの設定方法">キーバインドの設定方法</h2>
+<p>ErgoDox EZは<a href="https://www.pjrc.com/teensy/">Teensy USB Development Board </a>と言うソフトウェアを使い、
+コンパイルしたファームウェアをキーボードに流し込んでキーバインドを自由に設定することができる。</p>
+<p>やり方はシンプルで下記のやり方で設定できる:</p>
+<ul>
+<li>Teensyをダウンロード</li>
+<li>ファームウェアをコンパイルして<code>.hex</code>を生成</li>
+<li>Teensyに生成した.hexを流し込む</li>
+</ul>
+<p>ここではまず、ファームウェアのコンパイル方法から説明する。</p>
+<h3 id="ファームウェアのコンパイル">ファームウェアのコンパイル</h3>
+<p>まずコンパイルに一通り必要なソフトウェアをインストールする。(MacOS前提)</p>
+<pre><code>brew tap osx-cross/avr
+brew install avr-libc
+brew install dfu-programmer
+</code></pre><p>そのあとは、<code>https://github.com/qmk/qmk_firmware/tree/master/keyboards/ergodox_ez</code>のソースコードをダウンロードし、
+<code>keymaps/default</code>というディレクトリと同じ場所に自分自身のディレクトリを作成して、default以下の<code>keymap.c</code>と同様のファイルを作成する（コピーして編集するといい）。
+それを<code>make KEYMAP=[your_name]</code>でmakeするとコンパイルされたhexファイルが作成される。hexファイルが作成されたらTeensyに読み込ませてキーボードに流し込むとキーバインドが反映される。</p>
+<p>自分で<code>keymap.c</code>を編集するのが一番自由度が高くて良いが、一番手っ取り早いやり方にGUI上でキーバインドを設定してhexファイルを生成する方法がある。</p>
+<p><a href="https://configure.ergodox-ez.com/layouts/default/latest/0">https://configure.ergodox-ez.com/layouts/default/latest/0</a></p>
+<p>このサイトではGUIベースでキーバインドを決めれるのでとても楽に直感で設定ができる。また、<code>Print layout</code>から印刷もできるのでキーバインドを覚えるように印刷するのがオススメ。</p>
+<h3 id="jisキーボード設定">JISキーボード設定</h3>
+<p>さて、ここから自分が一番苦労したところである、JISキーボードの設定を書く。
+書くといっても答えはシンプルで、USキーボードとは割当てられているキーがJISとは違うので変換して登録をしてあげるだけである。
+たとえば、JISの場合の<code>@</code>はUSの場合だと<code>[</code>と打刻される。このように微妙に配列が違う箇所があるので、hexを生成する際にこの差分を吸収してあげないといけない。</p>
+<p>JISキーボードとUSキーボードの違いは下記の通りである:</p>
+<table>
+<thead>
+<tr>
+<th>JIS</th>
+<th>US</th>
+<th>JIS(Shift)</th>
+<th>US(Shift)</th>
+<th>Ergodox</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>!</td>
+<td>!</td>
+<td>KC_1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td>&quot;</td>
+<td>@</td>
+<td>KC_2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3</td>
+<td>#</td>
+<td>#</td>
+<td>KC_3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>$</td>
+<td>$</td>
+<td>KC_4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>5</td>
+<td>%</td>
+<td>%</td>
+<td>KC_5</td>
+</tr>
+<tr>
+<td>6</td>
+<td>6</td>
+<td>&amp;</td>
+<td>^</td>
+<td>KC_6</td>
+</tr>
+<tr>
+<td>7</td>
+<td>7</td>
+<td>'</td>
+<td>&amp;</td>
+<td>KC_7</td>
+</tr>
+<tr>
+<td>8</td>
+<td>8</td>
+<td>(</td>
+<td>*</td>
+<td>KC_8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>9</td>
+<td>)</td>
+<td>(</td>
+<td>KC_9</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>無</td>
+<td>)</td>
+<td>KC_0</td>
+</tr>
+<tr>
+<td>-</td>
+<td>-</td>
+<td>=</td>
+<td>_</td>
+<td>KC_MINS</td>
+</tr>
+<tr>
+<td>^</td>
+<td>=</td>
+<td>~</td>
+<td>+</td>
+<td>KC_EQL</td>
+</tr>
+<tr>
+<td>\</td>
+<td>無</td>
+<td>｜</td>
+<td>無</td>
+<td>KC_JYEN</td>
+</tr>
+<tr>
+<td>@</td>
+<td>[</td>
+<td>`</td>
+<td>{</td>
+<td>KC_LBRC</td>
+</tr>
+<tr>
+<td>[</td>
+<td>]</td>
+<td>{</td>
+<td>}</td>
+<td>KC_RBRC</td>
+</tr>
+<tr>
+<td>;</td>
+<td>;</td>
+<td>+</td>
+<td>:</td>
+<td>KC_SCLN</td>
+</tr>
+<tr>
+<td>:</td>
+<td>'</td>
+<td>*</td>
+<td>&quot;</td>
+<td>KC_QUOT</td>
+</tr>
+<tr>
+<td>]</td>
+<td>\</td>
+<td>}</td>
+<td>｜</td>
+<td>KC_BSLS</td>
+</tr>
+<tr>
+<td>,</td>
+<td>,</td>
+<td>&lt;</td>
+<td>&lt;</td>
+<td>KC_COMM</td>
+</tr>
+<tr>
+<td>.</td>
+<td>.</td>
+<td>&gt;</td>
+<td>&gt;</td>
+<td>KC_DOT</td>
+</tr>
+<tr>
+<td>/</td>
+<td>/</td>
+<td>?</td>
+<td>?</td>
+<td>KC_SLSH</td>
+</tr>
+<tr>
+<td>\</td>
+<td>無</td>
+<td>_</td>
+<td>無</td>
+<td>KC_RO</td>
+</tr>
+</tbody>
+</table>
+<p>要するに上記の差分表を意識して、自分の意図するキーバインドを設定してあげると良い。
+ErgoDoxの場合はUSキーボード前提なので、言葉の意味合いがJISキーボードの場合だと変わってしまうと言うだけである。
+自分はGUIサイトでこの差分表を見ながらJISに合わせて設定をした。結構めんどくさかったが、一度やってしまえば二度とやる作業ではないのでまあ頑張るしかない。</p>
+<h2 id="まとめ">まとめ</h2>
+<p>JISキーボード対応以外にもファームウェアのRESETボタンを事前にキーバインドに設定しておいたり、
+Layer間移動の設定や、英語と日本語の変換などと細かい設定が必要だが、それぞれ自分の好きなところにキーを設定できるのはとてもありがたい。
+割と何度もファームウェアの流し込みを繰り返しながら、自分に合うキーバインドを探すことになるがこれは結構楽しかった。</p>
+<p>おかげで生産性は上がった気がするので、キーボードはプログラマーにとってやっぱり大事な道具の一つだよなと改めて思う。</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>ONNXのdocを読む: ONNX versioning</title>
+            <link>https://sott0n.github.io/posts/2019/03/onnx%E3%81%AEdoc%E3%82%92%E8%AA%AD%E3%82%80-onnx-versioning/</link>
+            <pubDate>Wed, 06 Mar 2019 09:44:12 +0900</pubDate>
+            
+            <guid>https://sott0n.github.io/posts/2019/03/onnx%E3%81%AEdoc%E3%82%92%E8%AA%AD%E3%82%80-onnx-versioning/</guid>
+            <description>ONNXのドキュメントをちゃんと読もうということで読んだところからメモとしていろいろまとめていこうと思う（今更だけど）。今回はONNX利用者がまず意識しないといけないversioningのドキュメントを読む。
 Ref: https://github.com/onnx/onnx/blob/v1.4.1/docs/Versioning.md
  ONNX versioningの基本方針 ONNXのversioningには大きく三つのポリシーがある:
  IR version: グラフと演算子の抽象モデル、それらのフォーマットのバージョン管理。 Operator version: ONNX graphから参照されるオペレータ仕様のバージョン管理。 Model version: 定義済み/学習済みモデルのバージョン管理。  IR versionとOperator versionは守らなければいけないバージョン管理であるが、Model versionに関しては任意である（推奨されているだけ）。ローカルで独自に利用する場合はユーザーの判断に任されるが、オープンにシェアする前提のモデルに関してはversioninigをすべきである。
@@ -83,7 +581,50 @@ Operator versioning Deep Learningの各命令（convやfcなど）のバージ�
 Model versioning Model versioningはONNX変換して配布するユーザーによって依存するため、あくまでもONNXが推奨するプラクティスを提示しているだけである。なので、学習済みモデルをONNXのフォーマットに変換して配布する場合はONNXが推奨するバージョンの付け方に従うといい。推奨されるやり方としては破壊的変更であるケースと非破壊的変更のケースの二つに分かれる。 破壊的変更である場合はModelProto.model_versionのメジャーバージョンをインクリメントする。破壊的変更は下記のようなものを含む:
  カラー画像のインプットからグレースケールに変換するといったインプットまたはアウトプットの意味を変えてしまう変更 互換性のない型の変更 GraphProto内の値と同じ名前の値いったインプットの追加 既存アウトプットの削除  また、非破壊的変更はModelProto.model_versionのマイナーバージョンをインクリメントする。非破壊的変更は下記のようなものを含む: 互換性のある型の変更 意味を持った、または指定されたデフォルト値がある新しい入力の追加 以前のバージョンのグラフでは不可能だった入力によって引き起こされる新しい振る舞いの追加
  ONNXの躓くところとして、opsetのバージョンの差異があると思う。バージョンが違った際にはONNXが提供しているVersion Converterを利用することができるが、まだ上手く動かないといったことは多い。ONNXを利用する場合は、インプットとアウトプットのONNX対応のバージョンの互換性を確認する必要がある。</description>
-    </item>
-    
-  </channel>
+            <content type="html"><![CDATA[<p>ONNXのドキュメントをちゃんと読もうということで読んだところからメモとしていろいろまとめていこうと思う（今更だけど）。今回はONNX利用者がまず意識しないといけないversioningのドキュメントを読む。<br>
+Ref: <a href="https://github.com/onnx/onnx/blob/v1.4.1/docs/Versioning.md">https://github.com/onnx/onnx/blob/v1.4.1/docs/Versioning.md</a></p>
+<hr>
+<h2 id="onnx-versioningの基本方針">ONNX versioningの基本方針</h2>
+<p>ONNXのversioningには大きく三つのポリシーがある:</p>
+<ul>
+<li>IR version: グラフと演算子の抽象モデル、それらのフォーマットのバージョン管理。</li>
+<li>Operator version: ONNX graphから参照されるオペレータ仕様のバージョン管理。</li>
+<li>Model version: 定義済み/学習済みモデルのバージョン管理。</li>
+</ul>
+<p>IR versionとOperator versionは守らなければいけないバージョン管理であるが、Model versionに関しては任意である（推奨されているだけ）。ローカルで独自に利用する場合はユーザーの判断に任されるが、オープンにシェアする前提のモデルに関してはversioninigをすべきである。</p>
+<h2 id="ir-versioning">IR versioning</h2>
+<p>型定義などIRを構築するもののバージョン管理。ONNX IR formatはprotobuf3のUpdating a Message Typeに規定されたバージョン管理ガイドラインを準拠している。ONNXにはONNX checkerというものがあり、このツールによってルールが守られているかどうかがチェックされている。<br>
+Ref: <a href="https://developers.google.com/protocol-buffers/docs/proto3#updating">Protobuf3 Updating a Message Type</a></p>
+<h2 id="operator-versioning">Operator versioning</h2>
+<p>Deep Learningの各命令（convやfcなど）のバージョン管理。operatorは3要素のtupleで定義されている。</p>
+<blockquote>
+<p>(domain.op_type:op_version)
+グラフ内のノードはいつもこの3要素を参照してoperatorを見るようになっている。また、破壊的なoperatorの変更は下記の通り:</p>
+</blockquote>
+<ul>
+<li>operator自体のadding/removing/renaming。また、新しいオプション属性の追加も含まれる</li>
+<li>operatorのinputとoutputのadding/removing/reordering。</li>
+<li>型の追加と削除、あるいは変更</li>
+<li>既存parameterのシグネチャの新しい振る舞い</li>
+</ul>
+<p>ONNXモデルは二つのオペレータ情報（domain, opset_verison）を含んだリストを宣言する必要がある。空の文字列（&quot;&quot;）ドメインはONNX仕様の一部として定義されているオペレータであることを示す。与えられたモデルよって指定されたオペレータセットの和集合は、モデルグラフ内の各ノードに対して互換性のあるオペレータを宣言しなければならない。</p>
+<h2 id="model-versioning">Model versioning</h2>
+<p>Model versioningはONNX変換して配布するユーザーによって依存するため、あくまでもONNXが推奨するプラクティスを提示しているだけである。なので、学習済みモデルをONNXのフォーマットに変換して配布する場合はONNXが推奨するバージョンの付け方に従うといい。推奨されるやり方としては破壊的変更であるケースと非破壊的変更のケースの二つに分かれる。
+破壊的変更である場合はModelProto.model_versionのメジャーバージョンをインクリメントする。破壊的変更は下記のようなものを含む:</p>
+<ul>
+<li>カラー画像のインプットからグレースケールに変換するといったインプットまたはアウトプットの意味を変えてしまう変更</li>
+<li>互換性のない型の変更</li>
+<li>GraphProto内の値と同じ名前の値いったインプットの追加</li>
+<li>既存アウトプットの削除</li>
+</ul>
+<p>また、非破壊的変更はModelProto.model_versionのマイナーバージョンをインクリメントする。非破壊的変更は下記のようなものを含む:
+互換性のある型の変更
+意味を持った、または指定されたデフォルト値がある新しい入力の追加
+以前のバージョンのグラフでは不可能だった入力によって引き起こされる新しい振る舞いの追加</p>
+<hr>
+<p>ONNXの躓くところとして、opsetのバージョンの差異があると思う。バージョンが違った際にはONNXが提供しているVersion Converterを利用することができるが、まだ上手く動かないといったことは多い。ONNXを利用する場合は、インプットとアウトプットのONNX対応のバージョンの互換性を確認する必要がある。</p>
+]]></content>
+        </item>
+        
+    </channel>
 </rss>
