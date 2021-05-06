@@ -94,8 +94,17 @@ Model versioning Model versioningはONNX変換して配布するユーザーに�
       <guid>https://sott0n.github.io/about/</guid>
       <description>About 👾 Who?
  Kohei Yamaguchi, software research engineer at Tokyo. GitHub: https://github.com/sott0n Twitter: https://twitter.com/sott0n  👾 Interests?
- Compiler. WebAssembly x Machine Learning. MLOps, especially Kubeflow.  👾 Career?
- System Engineer : 2 years Data Scieitist : 5 years Researcher : 1 years~x  </description>
+ System Programming, Compiler/OS/Filesystem/Emulator. WebAssembly x Machine Learning. MLOps, especially Kubeflow.  👾 Career?
+ System Engineer : 2 years Data Scieitist : 5 years ML Researcher : 1 years~n  </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://sott0n.github.io/host/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sott0n.github.io/host/</guid>
+      <description>Hosting static page  todo.react  This is a toy TODO app written React.    </description>
     </item>
     
   </channel>

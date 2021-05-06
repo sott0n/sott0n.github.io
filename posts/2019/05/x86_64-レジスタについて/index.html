@@ -9,7 +9,7 @@
 レジスタの種類 一言でレジスタと言ってもいろいろな用途があり、大きく下記のように一般的なCPUでは分類することができる。
  汎用レジスタ: データの保存用。x86_64では64bit値を保持できる。 プログラムカウンタ: 現在実行している命令のアドレスを保持する。この値を操作するのに特殊な命令が必要になる。 フラグレジスタ: 演算結果のうち、データではない結果を保持する。例えば、足し算の結果が64bit値に収まらない場合にそれを示す値が入れられる。 浮動小数レジスタ: 浮動小数演算のデータを保持する。  x86_64でgdbのinfo_registersを入力すると多くのレジスタが表示される。
    レジスタ名 内容     rax 汎用レジスタ   rbx 汎用レジスタ   rcx 汎用レジスタ   rdx 汎用レジスタ   rsi 汎用レジスタ   rdi 汎用レジスタ   rbp 汎用レジスタ   rsp 汎用レジスタ兼スタックポインタ   r8 汎用レジスタ   r9 汎用レジスタ   r10 汎用レジスタ   r11 汎用レジスタ   r12 汎用レジスタ   r13 汎用レジスタ   r14 汎用レジスタ   r15 汎用レジスタ   rip プログラムカウンタ   eflags フラグレジスタ   cs セグメントレジスタ   ss セグメントレジスタ   ds セグメントレジスタ   es セグメントレジスタ   fs セグメントレジスタ   gs セグメントレジスタ    このようにレジスタにも沢山あって、自分たちが気軽に書いているプログラムは目に見えないところでそれぞれのレジスタを利用してデータ操作をしながら命令を実行している。一つ一つのレジスタの容量は小さく、汎用レジスタは16個ほどあるが、それぞれ8byteの容量となるため全部で128byteという小さいサイズのデータしか保存することができない。当然、現代で使われるデータ(例えば画像とか)が128byteに収まるなんてあり得ないため、大きなデータを保存するためにコンピュータにはメモリという主記憶装置が存在し、また、SSDやHDDといった大容量データ保存用の場所が別で用意されている。" />
-<meta name="keywords" content=", x86_64" />
+<meta name="keywords" content="homepage, blog, x86_64" />
 <meta name="robots" content="noodp" />
 <meta name="theme-color" content="" />
 <link rel="canonical" href="https://sott0n.github.io/posts/2019/05/x86_64-%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/" />
@@ -107,7 +107,7 @@
         <span class="header__right">
             
                 <nav class="menu">
-    <ul class="menu__inner"><li><a href="https://sott0n.github.io/about">About</a></li><li><a href="https://sott0n.github.io/posts">Blog</a></li>
+    <ul class="menu__inner"><li><a href="https://sott0n.github.io/about">About</a></li><li><a href="https://sott0n.github.io/posts">Blog</a></li><li><a href="https://sott0n.github.io/host">Host</a></li>
     </ul>
 </nav>
 

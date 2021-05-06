@@ -16,7 +16,7 @@ MLIRとは MLIRはこれらの問題を解決する新しい中間表現とし�
 先にも書いたがTensorFlowにはいくつかのコンパイラとそれに紐づく中間表現があり、 これらは演算子のセマンティクスが異なるため、言語の各層ごとに構築する表現が異なっている。 MLIRはそれらの中間表現に対するメタ表現的な位置付けで、共通フォーマット化をしようとするインフラとしての方針を指している。
 MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
  TensorFlow IR, which represents all things possible in TensorFlow graphs XLA HLO IR, which is designed to take advantage of XLA’s compilation abilities (with output to, among other things, TPUs) An experimental affine dialect, which focuses on polyhedral representations and optimizations LLVM IR, which has a 1:1 mapping between it and LLVM’s own representation, allowing MLIR to emit GPU and CPU code through LLVM TensorFlow Lite, which will translate to running code on mobile platforms  Dialectsはカスタム型を定義することができる。 これにより将来的にどのDialectsであれ、LLVM IR型システム(ファーストクラスの集合体を持つ)、量子化型のようなML最適化アクセラレータにとって重要なドメイン抽象化、そしてSwiftまたはClang型システムが得られる。" />
-<meta name="keywords" content=", LLVM, ml" />
+<meta name="keywords" content="homepage, blog, LLVM, ml" />
 <meta name="robots" content="noodp" />
 <meta name="theme-color" content="" />
 <link rel="canonical" href="https://sott0n.github.io/posts/2019/04/mlir-%E6%96%B0%E3%81%97%E3%81%84tf%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%81%A8%E3%81%AA%E3%82%8B%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/" />
@@ -135,7 +135,7 @@ MLIR Dialects MLIRは下記をターゲットとしてサポートしている:
         <span class="header__right">
             
                 <nav class="menu">
-    <ul class="menu__inner"><li><a href="https://sott0n.github.io/about">About</a></li><li><a href="https://sott0n.github.io/posts">Blog</a></li>
+    <ul class="menu__inner"><li><a href="https://sott0n.github.io/about">About</a></li><li><a href="https://sott0n.github.io/posts">Blog</a></li><li><a href="https://sott0n.github.io/host">Host</a></li>
     </ul>
 </nav>
 
