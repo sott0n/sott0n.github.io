@@ -104,7 +104,7 @@ Model versioning Model versioningはONNX変換して配布するユーザーに�
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://sott0n.github.io/host/</guid>
-      <description>Hosting static page  todo.react  This is a toy TODO app written React.    </description>
+      <description>Hosting static page  conway.wasm  Conway game of line written by WebAssembly.   todo.react  This is a toy TODO app written React.    </description>
     </item>
     
   </channel>
